@@ -1,0 +1,128 @@
+:root{
+    --bg: #111111;
+    --card: #1b1b1b;
+    --green: #32CD32; /* bright green */
+    --muted: #a9a9a9;
+    --white: #ffffff;
+}
+
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--white);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 20px;
+    background:linear-gradient(90deg,#0f0f0f, #161616);
+    border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.topbar .logo{height:40px}
+
+.container{
+    max-width:1100px;
+    margin:22px auto;
+    padding:20px;
+}
+
+.card{
+    max-width:420px;
+    margin:60px auto;
+    background:var(--card);
+    padding:22px;
+    border-radius:12px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    text-align:left;
+}
+
+label{display:block;margin-bottom:10px;font-size:14px;color:var(--muted);}
+input[type="text"], input[type="password"], select, input[type="time"], input[type="number"]{
+    width:100%;
+    padding:10px 12px;
+    margin-top:6px;
+    background:#0d0d0d;
+    border:1px solid rgba(255,255,255,0.04);
+    color:var(--white);
+    border-radius:8px;
+}
+.btn{
+    background:var(--green);
+    border:none;
+    padding:10px 14px;
+    color:#020202;
+    font-weight:700;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:12px;
+}
+.alert{padding:10px;border-radius:6px;margin-bottom:12px;}
+.alert.error{background:#3a1b1b;color:#ffcfcf}
+.alert.success{background:#163a16;color:#bff6bf}
+a{color:var(--green);text-decoration:none}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+        margin: 12px auto;
+    }
+
+    .card {
+        margin: 30px auto;
+        padding: 18px;
+        max-width: 95%;
+    }
+
+    .card h2 {
+        font-size: 1.4rem;
+        text-align: center;
+    }
+
+    label {
+        font-size: 13px;
+    }
+
+    input[type="text"], 
+    input[type="password"], 
+    select, 
+    input[type="time"], 
+    input[type="number"] {
+        font-size: 0.95rem;
+        padding: 9px 10px;
+    }
+
+    .btn {
+        width: 100%;
+        font-size: 1rem;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        margin: 20px auto;
+        padding: 16px;
+    }
+
+    .card h2 {
+        font-size: 1.2rem;
+    }
+
+    input, select {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+}
+
+/*tot hier is voor login en register*/
+
