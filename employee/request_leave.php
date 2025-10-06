@@ -3,6 +3,7 @@ require_once '../includes/auth.php';
 require_login('employee');
 require_once '../includes/config.php';
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO leave_requests (employee_id, start_date, end_date, reason, status) VALUES (?, ?, ?, ?, 'pending')");
     $stmt->execute([
@@ -13,6 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     $success = "✅ Leave request submitted successfully!";
 }
+
+// Fetch leave requests for this employee
+$stmt = $pdo->prepare("SELECT * FROM leave_requests WHERE employee_id = ? ORDER BY created_at DESC");
+$stmt->execute([$_SESSION['user']['id']]);
+$leave_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html>
@@ -28,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
         }
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 60px auto;
             background: #1a1a1a;
             padding: 25px;
@@ -79,6 +85,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #fff;
             border-radius: 6px;
         }
+        .requests {
+            margin-top: 30px;
+        }
+        .requests h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #f1faee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #222;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        table th, table td {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            text-align: center;
+        }
+        table th {
+            background: #333;
+            color: #32CD32;
+        }
+        .status {
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .status.pending { background: #444; color: #f1faee; }
+        .status.accepted { background: #28a745; color: #fff; }
+        .status.declined { background: #e63946; color: #fff; }
     </style>
 </head>
 <body>
@@ -90,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="success"><?= $success ?></div>
         <?php endif; ?>
 
+        <!-- Leave Request Form -->
         <form method="post">
             <label>Start Date</label>
             <input type="date" name="start_date" required>
@@ -102,6 +141,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <button type="submit">Submit Request</button>
         </form>
+
+        <!-- Past Requests -->
+        <?php if ($leave_requests): ?>
+        <div class="requests">
+            <h2>Your Leave Requests</h2>
+            <table>
+                <tr>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                </tr>
+                <?php foreach ($leave_requests as $request): ?>
+                <tr>
+                    <td><?= htmlspecialchars($request['start_date']) ?></td>
+                    <td><?= htmlspecialchars($request['end_date']) ?></td>
+                    <td><?= htmlspecialchars($request['reason']) ?></td>
+                    <td>
+                        <span class="status <?= htmlspecialchars($request['status']) ?>">
+                            <?= ucfirst($request['status']) ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>

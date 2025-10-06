@@ -1,63 +1,42 @@
 <?php
-//echo password_hash('SuperSecret123', PASSWORD_DEFAULT);
-
-// register.php
 require_once __DIR__ . '/includes/config.php';
 
 $errors = [];
-$success = '';
+$success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fullname = trim($_POST['fullname'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
+    $fullname = trim($_POST['fullname']);
+    $phone = trim($_POST['phone']);
     $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $role = $_POST['role'] ?? '';
+    $category = $_POST['category'] ?? '';
+    $shift = $_POST['shift'] ?? '';
+    $place_of_work = $_POST['place_of_work'] ?? '';
 
-    // Employee extra fields:
-    $role = trim($_POST['role'] ?? 'Employee');
-    $category = trim($_POST['category'] ?? '');
-    $shift = trim($_POST['shift'] ?? '');
-    $place_of_work = trim($_POST['place_of_work'] ?? '');
-    $hourly_pay = $_POST['hourly_pay'] ?? 0.00;
-    $monthly_pay = $_POST['monthly_pay'] ?? 0.00;
-    $expected_clockin = $_POST['expected_clockin'] ?? null;
-    $expected_clockout = $_POST['expected_clockout'] ?? null;
+    // Validate required fields
+    if (empty($fullname) || empty($password) || empty($confirm_password)) {
+        $errors[] = "Please fill in all required fields.";
+    }
 
-    if ($fullname === '' || $password === '' || $confirm === '') {
-        $errors[] = "Please fill all required fields.";
-    } elseif ($password !== $confirm) {
+    if ($password !== $confirm_password) {
         $errors[] = "Passwords do not match.";
-    } else {
-        // Hash password
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+    }
 
-        // Check for duplicate employee
-        $stmt = $pdo->prepare("SELECT id FROM employees WHERE fullname = ?");
-        $stmt->execute([$fullname]);
-        if ($stmt->fetch()) {
-            $errors[] = "Employee with that name already exists.";
-        } else {
-            $ins = $pdo->prepare("INSERT INTO employees 
-                (fullname, phone, password, role, category, shift, place_of_work, hourly_pay, monthly_pay, expected_clockin, expected_clockout)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $ins->execute([
-                $fullname,
-                $phone,
-                $hash,
-                $role,
-                $category,
-                $shift,
-                $place_of_work,
-                $hourly_pay,
-                $monthly_pay,
-                $expected_clockin ?: null,
-                $expected_clockout ?: null
-            ]);
-            $success = "Employee account created. You can now login.";
-        }
+    if (empty($errors)) {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $pdo->prepare("INSERT INTO employees 
+            (fullname, phone, password, role, category, shift, place_of_work, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+        $stmt->execute([$fullname, $phone, $passwordHash, $role, $category, $shift, $place_of_work]);
+
+        $newUserId = $pdo->lastInsertId();
+        $_SESSION['pending_user_id'] = $newUserId;
+
+        $success = true;
     }
 }
-
 ?>
 <!doctype html>
 <html>
@@ -77,18 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
 
-    <?php if ($success): ?>
-        <div class="alert success"><?=htmlspecialchars($success)?></div>
-    <?php endif; ?>
-
     <form method="post" action="register.php">
-        <!--label>Account type
-            <select name="type" id="type" onchange="toggleEmployeeFields()">
-                <option value="employee" selected>Employee</option>
-                <option value="admin">Admin (CEO)</option>
-            </select>
-        </label-->
-
         <label>Full name
             <input type="text" name="fullname" required>
         </label>
@@ -162,12 +130,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p>Already have an account? <a href="login.php">Login</a></p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php if ($success): ?>
 <script>
-function toggleEmployeeFields(){
-    const type = document.getElementById('type').value;
-    document.getElementById('employeeFields').style.display = (type === 'employee') ? 'block' : 'none';
-}
-toggleEmployeeFields();
+Swal.fire({
+    icon: 'success',
+    title: 'Successfully Registered',
+    text: 'Please wait for admin\'s approval before logging in.',
+    confirmButtonColor: '#1e88e5'
+});
 </script>
+<?php endif; ?>
 </body>
 </html>

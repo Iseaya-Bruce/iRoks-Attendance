@@ -59,7 +59,8 @@ try {
                 ]);
                 exit;
             } else {
-                header("Location: clock.php");
+                $redirTime = isset($row['clockin_time']) ? $row['clockin_time'] : date('Y-m-d H:i:s');
+                header('Location: dashboard.php?success=1&action=clockin&time=' . urlencode($redirTime));
                 exit;
             }
         }
@@ -114,18 +115,21 @@ try {
                 if ($isAjax) {
                     header('Content-Type: application/json');
                     echo json_encode([
-                        'success' => true,
-                        'action' => 'clockout',
-                        'clockout_time' => $row['clockout_time'],
-                        'worked_hours' => $worked_hours,
-                        'overtime_hours' => $overtime_hours,
-                        'message' => 'Clocked out'
+                    'success' => true,
+                    'action' => 'clockout',
+                    'clockout_time' => $row['clockout_time'],
+                    'worked_hours' => $worked_hours,
+                    'overtime_hours' => $overtime_hours,
+                    'message' => 'Clocked out'
                     ]);
                     exit;
-                } else {
-                    header("Location: clock.php");
+                    } else {
+                    $redirTime = isset($row['clockout_time']) ? $row['clockout_time'] : date('Y-m-d H:i:s');
+                    $wh = isset($worked_hours) ? $worked_hours : 0;
+                    $ot = isset($overtime_hours) ? $overtime_hours : 0;
+                    header('Location: dashboard.php?success=1&action=clockout&time=' . urlencode($redirTime) . '&worked_hours=' . urlencode($wh) . '&overtime_hours=' . urlencode($ot));
                     exit;
-                }
+                    }
             } else {
                 // nothing to clock out
                 if ($isAjax) {
@@ -133,7 +137,7 @@ try {
                     echo json_encode(['success'=>false,'error'=>'No open shift to clock out.']);
                     exit;
                 } else {
-                    header("Location: clock.php");
+                    header('Location: dashboard.php?success=0&error=no_open_shift');
                     exit;
                 }
             }
@@ -145,7 +149,7 @@ try {
             echo json_encode(['success'=>false,'error'=>'Invalid action']);
             exit;
         } else {
-            header("Location: clock.php");
+            header('Location: dashboard.php?success=0&error=invalid_action');
             exit;
         }
     }
@@ -163,33 +167,20 @@ try {
     // For normal page, show error
     die("Error: " . $e->getMessage());
 }
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clock In / Out</title>
-<link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
-<div class="container">
-    <h2>Clock In / Out</h2>
-
-    <?php if (!$today): ?>
-        <form method="post">
-            <button type="submit" name="action" value="clockin" class="btn btn-success">Clock In</button>
-        </form>
-    <?php elseif ($today && $today['clockout_time'] === null): ?>
-        <p>Clocked in at: <?= htmlspecialchars($today['clockin_time']) ?></p>
-        <form method="post">
-            <button type="submit" name="action" value="clockout" class="btn btn-danger">Clock Out</button>
-        </form>
-    <?php else: ?>
-        <p>You worked today from <?= htmlspecialchars($today['clockin_time']) ?> to <?= htmlspecialchars($today['clockout_time']) ?></p>
-    <?php endif; ?>
-
-    <a href="dashboard.php">← Back to Dashboard</a>
-</div>
-</body>
-</html>
+// Backend-only: on GET return JSON status for AJAX, otherwise redirect to dashboard.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'status' => $today
+                ? ($today['clockout_time'] === null ? 'in' : 'out')
+                : 'not_started',
+            'clockin_time' => $today['clockin_time'] ?? null,
+            'clockout_time' => $today['clockout_time'] ?? null,
+        ]);
+    } else {
+        header('Location: dashboard.php');
+    }
+    exit;
+}

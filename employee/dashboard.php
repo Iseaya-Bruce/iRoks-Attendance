@@ -20,7 +20,7 @@ $lastClockIn = $todayShift['clockin_time'] ?? null;
 $lastClockOut = $todayShift['clockout_time'] ?? null;
 
 // Fetch employee
-$stmt = $pdo->prepare("SELECT * FROM employees WHERE id=?");
+$stmt = $pdo->prepare(query: "SELECT * FROM employees WHERE id=?");
 $stmt->execute([$user_id]);
 $emp = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -34,6 +34,24 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$user_id]);
 $attendance = $stmt->fetchAll();
+
+// Attendance percent for donut (admin logic replicated)
+$monthStart = date("Y-m-01");
+$monthEnd = date("Y-m-t");
+// Count distinct worked days this month
+$wdStmt = $pdo->prepare("SELECT COUNT(DISTINCT DATE(clockin_time)) FROM attendance WHERE employee_id=? AND clockin_time BETWEEN ? AND ?");
+$wdStmt->execute([$user_id, $monthStart, $monthEnd]);
+$workedDaysThisMonth = (int)$wdStmt->fetchColumn();
+
+// Total working days (Mon–Sat)
+$totalWorkingDays = 0;
+$period = new DatePeriod(new DateTime($monthStart), new DateInterval('P1D'), new DateTime($monthEnd . ' +1 day'));
+foreach ($period as $d) {
+    if ((int)$d->format("N") < 7) { // 1..6 = Mon..Sat
+        $totalWorkingDays++;
+    }
+}
+$attendancePercent = $totalWorkingDays ? round(($workedDaysThisMonth / $totalWorkingDays) * 100, 1) : 0;
 
 // Totals
 $total_hours = 0;
@@ -88,6 +106,7 @@ h1, h2 {
     object-fit: cover; 
     border: 2px solid #32CD32; 
     z-index: 10; 
+    animation: rgbGlow 5s infinite linear;
 }
 
 .summary { 
@@ -103,11 +122,10 @@ table {
 }
 th, td { 
     padding: 10px; 
-    border-bottom: 1px solid #333; 
-    text-align: center; 
+    box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease;
 }
 th { 
-    background: #222; 
+    background: #222; color: #32CD32;
 }
 tr:hover { 
     background: #222; 
@@ -183,7 +201,7 @@ tr:hover {
     letter-spacing: 0.02em;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.2s ease;
+    transition: transform 0.15s ease, 0.2s ease;
 
     /* continuous glowing pulse */
     animation: pulseGlow 2.5s ease-in-out infinite;
@@ -431,6 +449,7 @@ textarea {
         <!-- Clock status here -->
         <p>
             <strong>Status:</strong>
+            <span id="clockStatus">
             <?php
             $stmt = $pdo->prepare("SELECT * FROM attendance WHERE employee_id=? AND work_date=CURDATE()");
             $stmt->execute([$user_id]);
@@ -446,27 +465,27 @@ textarea {
                     . htmlspecialchars(date('H:i', strtotime($today['clockout_time']))) . '</span>';
             }
             ?>
+            </span>
         </p>
     </div>
 
     
 
     <div class="actions">
-        <!-- Clock button -->
-        <form method="post" action="clock.php" style="display:inline;">
-            <?php if (!$today): ?>
-                <button type="submit" name="action" value="clockin" class="btn btn-anim-clock"><span class="icon-clock">🕒</span><span class="label">Clock In</span></button>
-            <?php elseif ($today && $today['clockout_time'] === null): ?>
-                <button type="submit" name="action" value="clockout" class="btn btn-anim-clock"><span class="icon-clock">🕒</span><span class="label">Clock Out</span></button>
-            <?php else: ?>
-                <button type="button" class="btn" disabled>✔ Completed</button>
-            <?php endif; ?>
-        </form>
+        <!-- Clock button (AJAX, stays on dashboard) -->
+        <?php
+            $initialClocked = $isClockedIn ? '1' : '0';
+            $initialLabel = $isClockedIn ? 'Clock Out' : 'Clock In';
+        ?>
+        <button id="clockBtn" class="btn btn-anim-clock" data-clocked="<?= $initialClocked ?>">
+            <span class="icon-clock">🕒</span>
+            <span id="clockBtnLabel"><?= htmlspecialchars($initialLabel) ?></span>
+        </button>
 
         <!-- Other actions -->
         <a href="../pdf/generate.php?id=<?= $emp['id'] ?>" class="btn btn-chat">👁️ View Timesheet</a>
         <a href="../pdf/generate.php?id=<?= $emp['id'] ?>" class="btn btn-pdf">📄 Export as PDF</a>
-        <a href="../chat/chat.php" class="btn btn-chat">💬 Chat with Admin</a>
+        <a href="../chat/conversation.php" class="btn btn-chat">💬 Chat with Admin</a>
         <a href="upload_profile.php" class="btn btn-upload">📷 Upload Picture</a>
         <a href="request_leave.php" class="btn btn-anim-plane"><span class="icon-plane">✈</span> Request Leave</a>
         <a href="../logout.php" class="btn btn-chat"> Logout</a>
@@ -524,9 +543,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const label = document.getElementById('clockBtnLabel');
     const status = document.getElementById('clockStatus');
 
-    if (!btn) return;
-
-    btn.addEventListener('click', function () {
+    if (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
         btn.disabled = true;
         const currentlyClocked = btn.dataset.clocked === '1';
         const action = currentlyClocked ? 'clockout' : 'clockin';
@@ -534,70 +553,99 @@ document.addEventListener('DOMContentLoaded', function () {
         label.textContent = '⏳ Processing...';
 
         fetch('clock.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin',
-            body: 'action=' + encodeURIComponent(action)
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin',
+          body: 'action=' + encodeURIComponent(action)
         })
         .then(res => res.json())
         .then(data => {
-            if (!data || data.success === false) {
-                const message = (data && data.error) ? data.error : 'Unknown error';
-                alert('Error: ' + message);
-                label.textContent = prevLabel;
-                btn.disabled = false;
-                return;
-            }
-
-            if (data.action === 'clockin') {
-                btn.dataset.clocked = '1';
-                label.textContent = '🕒 Clock Out';
-                if (data.clockin_time) {
-                    const d = new Date(data.clockin_time.replace(' ', 'T'));
-                    status.innerHTML = 'Last In: <strong>' + d.toLocaleString() + '</strong>';
-                }
-            } else if (data.action === 'clockout') {
-                btn.dataset.clocked = '0';
-                label.textContent = '🕒 Clock In';
-                let html = '';
-                if (data.clockout_time) {
-                    const dOut = new Date(data.clockout_time.replace(' ', 'T'));
-                    html += 'Last Out: <strong>' + dOut.toLocaleString() + '</strong>';
-                }
-                if (typeof data.worked_hours !== 'undefined' && data.worked_hours !== null) {
-                    html += ' &nbsp; Worked: <strong>' + data.worked_hours + ' h</strong>';
-                }
-                status.innerHTML = html;
-            }
-
-            // re-enable after a short delay
-            setTimeout(() => btn.disabled = false, 400);
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Request failed: ' + err);
+          if (!data || data.success === false) {
+            const message = (data && data.error) ? data.error : 'Unknown error';
+            Swal.fire({ icon: 'error', title: 'Clock action failed', text: message });
             label.textContent = prevLabel;
             btn.disabled = false;
+            return;
+          }
+
+          if (data.action === 'clockin') {
+            btn.dataset.clocked = '1';
+            label.textContent = 'Clock Out';
+            if (data.clockin_time) {
+              const d = new Date(data.clockin_time.replace(' ', 'T'));
+              const t = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              status.innerHTML = '<span style="color: limegreen; font-weight: bold;">✅ Clocked In at ' + t + '</span>';
+              Swal.fire({ icon: 'success', title: 'Successfully clocked in', text: 'Successfully clocked in at ' + t, timer: 2200, showConfirmButton: false });
+            }
+          } else if (data.action === 'clockout') {
+            btn.dataset.clocked = '0';
+            label.textContent = 'Clock In';
+            let html = '';
+            let t = '';
+            if (data.clockout_time) {
+              const dOut = new Date(data.clockout_time.replace(' ', 'T'));
+              t = dOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              html += '<span style="color: red; font-weight: bold;">✔ Clocked Out at ' + t + '</span>';
+            }
+            if (typeof data.worked_hours !== 'undefined' && data.worked_hours !== null) {
+              html += ' &nbsp; Worked: <strong>' + data.worked_hours + ' h</strong>';
+            }
+            status.innerHTML = html;
+            Swal.fire({ icon: 'success', title: 'Successfully clocked out', text: 'Successfully clocked out at ' + t + (data.worked_hours != null ? '. Worked: ' + data.worked_hours + ' h' : ''), timer: 2300, showConfirmButton: false });
+          }
+
+          setTimeout(() => btn.disabled = false, 400);
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire({ icon: 'error', title: 'Request failed', text: String(err) });
+          label.textContent = prevLabel;
+          btn.disabled = false;
         });
-    });
+      });
+    }
+
+    // Fallback: show SweetAlert if redirected with query params
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('success')) {
+        const success = params.get('success') === '1';
+        const action = params.get('action');
+        const timeStr = params.get('time');
+        const errorMsg = params.get('error');
+        let msg = '';
+        if (success && timeStr && action) {
+          const d = new Date(timeStr.replace(' ', 'T'));
+          const t = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          msg = (action === 'clockin')
+            ? 'Successfully clocked in at ' + t
+            : 'Successfully clocked out at ' + t;
+          Swal.fire({ icon: 'success', title: (action === 'clockin') ? 'Successfully clocked in' : 'Successfully clocked out', text: msg, timer: 2400, showConfirmButton: false });
+        } else if (!success) {
+          Swal.fire({ icon: 'error', title: 'Clock action failed', text: errorMsg || 'Unknown error' });
+        }
+        // Clean URL
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, '', url);
+      }
+    } catch (e) { /* ignore */ }
 });
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const ctx = document.getElementById('workPercentageChart').getContext('2d');
-    const workedDays = <?= $total_days ?>;
-    const totalDaysInMonth = <?= date('t') ?>;
-    const percentage = Math.round((workedDays / totalDaysInMonth) * 100);
+    const percentage = <?= $attendancePercent ?>;
 
     new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Worked Days', 'Missed Days'],
             datasets: [{
-                data: [workedDays, totalDaysInMonth - workedDays],
+                data: [percentage, 100 - percentage],
                 backgroundColor: ['#32CD32', '#444'], // Green for worked, grey for missed
                 borderWidth: 0
             }]

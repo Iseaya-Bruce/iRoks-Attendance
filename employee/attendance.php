@@ -157,7 +157,7 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
     .month-scroll::-webkit-scrollbar { height: 8px; }
     .month-scroll::-webkit-scrollbar-track { background: #222; border-radius: 999px; }
     .month-scroll::-webkit-scrollbar-thumb { background: #32CD32; border-radius: 999px; }
-    .month-chip { flex:0 0 auto; padding:8px 12px; border-radius:999px; background:#222; color:#fff; border:1px solid rgba(255,255,255,0.1); text-decoration:none; font-weight:700; font-size:14px; box-shadow: 0 0 6px rgba(50,205,50,0.25) inset; }
+    .month-chip { flex:0 0 auto; padding:8px 12px; border-radius:999px; background: #222; color: #fff; border:1px solid rgba(255,255,255,0.1); text-decoration:none; font-weight:700; font-size:14px; box-shadow: 0 0 6px rgba(50,205,50,0.25) inset; }
     .month-chip:hover { background:#2a2a2a; box-shadow: 0 0 8px rgba(50,205,50,0.45) inset; }
     .month-chip.active { background:#32CD32; color:#111; box-shadow: 0 0 12px rgba(50,205,50,0.65); }
 

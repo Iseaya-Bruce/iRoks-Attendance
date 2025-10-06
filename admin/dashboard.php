@@ -6,10 +6,11 @@ require_once __DIR__ . '/../includes/config.php';
 // Get filters
 $shift = $_GET['shift'] ?? 'all';
 $category = $_GET['category'] ?? 'all';
+$role = $_GET['role'] ?? 'all';
 $place = $_GET['place'] ?? 'all';
 
-// Base query
-$sql = "SELECT * FROM employees WHERE 1=1";
+// Base query: only active employees
+$sql = "SELECT * FROM employees WHERE status = 'active'";
 $params = [];
 
 // Apply filters
@@ -21,15 +22,19 @@ if ($category !== 'all') {
     $sql .= " AND category = ?";
     $params[] = $category;
 }
+if ($role !== 'all') {
+    $sql .= " AND role = ?";
+    $params[] = $role;
+}
 if ($place !== 'all') {
     $sql .= " AND place_of_work = ?";
     $params[] = $place;
 }
 
-
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $employees = $stmt->fetchAll();
+
 
 // Function to calculate hours worked this month
 function getHoursThisMonth($pdo, $employeeId) {
@@ -90,64 +95,121 @@ function getAttendancePercent($pdo, $employeeId) {
         .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; }
         h1 { color: #32CD32; }
         .filters { margin-bottom: 20px; }
-        .filters select { padding: 6px; margin-right: 10px; }
+        .filters select { padding: 6px; margin-right: 10px; color: #32CD32; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 5px; border-bottom: 1px solid #333; text-align: center; }
-        th { background: #222; }
+        th, td { padding: 5px; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
+        th { color: #32CD32; background: #222; }
+        td:hover {transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,255,100,0.4);} 
         tr:hover { background: #2a2a2a; }
-        .actions a { margin: 0 5px; padding: 1px 1px; background: #32CD32; color: #111; text-decoration: none; border-radius: 6px; font-size: 14px; }
-        .actions a:hover { background: #28a428; }
-        .status-badge {font-size: 0.9em; font-weight: bold; padding: 1px 1px; border-radius: 20px; color: #fff;}
-        .status-badge.in { background: #28a745; }   /* green */
-        .status-badge.out { background: #dc3545; }  /* red */
-        /* Dropdown container */
+.actions a {
+  display: block;
+  margin: 6px 0;
+  padding: 6px 10px;
+  background: #32CD32;
+  color: #111;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-5px);
+  animation: none;
+  transition: background 0.2s ease;
+}
+.actions a:hover {
+  background: #28a428;
+}
+
 .dropdown {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
-/* Button */
 .dropbtn {
-    background-color: #32CD32;
-    color: #111;
-    padding: 6px 12px;
-    font-size: 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
-
 .dropbtn:hover {
-    background-color: #28a428;
+  background: #555;
 }
 
-/* Dropdown menu */
 .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #1a1a1a;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
-    border-radius: 6px;
-    z-index: 10;
+  position: absolute;
+  background: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-/* Links inside dropdown */
-.dropdown-content a {
-    color: #fff;
-    padding: 10px 14px;
-    text-decoration: none;
-    display: block;
-    font-size: 14px;
+/* When active */
+.dropdown-content.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Animate links 1-by-1 */
+.dropdown-content.show a {
+  animation: fadeSlideIn 0.4s ease forwards;
+}
+.dropdown-content.show a:nth-child(1) { animation-delay: 0.15s; }
+.dropdown-content.show a:nth-child(2) { animation-delay: 0.25s; }
+.dropdown-content.show a:nth-child(3) { animation-delay: 0.35s; }
+.dropdown-content.show a:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-content a:hover {
-    background-color: #333;
+  background: #dfffdc;
+  box-shadow: 0 0 6px rgba(0,0,0,0.08);
 }
 
-/* Show dropdown on hover */
-.dropdown:hover .dropdown-content {
-    display: block;
+@keyframes rgbGlow {
+  0%   { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
+  25%  { box-shadow: 0 0 15px orange, 0 0 30px orange, 0 0 45px orange; }
+  50%  { box-shadow: 0 0 15px lime, 0 0 30px lime, 0 0 45px lime; }
+  75%  { box-shadow: 0 0 15px cyan, 0 0 30px cyan, 0 0 45px cyan; }
+  100% { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile adjustments for dropdown */
+@media (max-width: 768px) {
+    .dropdown { position: static; }
+    .dropdown .dropbtn { width: auto; }
+    .dropdown .dropdown-content {
+        right: 12px;
+        left: auto;
+        min-width: min(80vw, 280px);
+    }
 }
 
 /* ✅ Responsive Design */
@@ -169,7 +231,7 @@ function getAttendancePercent($pdo, $employeeId) {
 
     .actions {
         flex-direction: column;
-        gap: 10px;
+        gap: 20px;
     }
 
     .btn, .btn-clock, button {
@@ -227,12 +289,27 @@ function getAttendancePercent($pdo, $employeeId) {
             <option value="shift_2" <?= $shift=='shift_2'?'selected':'' ?>>Shift 2</option>
         </select>
 
+        <label>Role:</label>
+        <select name="role">
+            <option value="all" <?= $role=='all'?'selected':'' ?>>All</option>
+            <option value="verkoop medewerker" <?= $role=='verkoop medewerker'?'selected':'' ?>>Verkoop medewerker</option>
+            <option value="driver" <?= $role=='driver'?'selected':'' ?>>Driver</option>
+            <option value="content creator" <?= $role=='content creator'?'selected':'' ?>>Content creator</option>
+            <option value="software engineer" <?= $role=='software engineer'?'selected':'' ?>>Software engineer</option>
+            <option value="hrm" <?= $role=='hrm'?'selected':'' ?>>HRM</option>
+            <option value="financieel administrator" <?= $role=='financieel administrator'?'selected':'' ?>>Financieel administrator</option>
+        </select>
+
         <label>Category:</label>
         <select name="category">
             <option value="all" <?= $category=='all'?'selected':'' ?>>All</option>
-            <option value="manager" <?= $category=='manager'?'selected':'' ?>>Manager</option>
-            <option value="assistant" <?= $category=='assistant'?'selected':'' ?>>Assistant</option>
-            <option value="intern" <?= $category=='intern'?'selected':'' ?>>Intern</option>
+            <option value="nuts" <?= $category=='nuts'?'selected':'' ?>>Nuts</option>
+            <option value="suribet" <?= $category=='suribet'?'selected':'' ?>>Suribet</option>
+            <option value="copie" <?= $category=='copie'?'selected':'' ?>>Copie</option>
+            <option value="e-services" <?= $category=='e-services'?'selected':'' ?>>E-services</option>
+            <option value="delivery" <?= $category=='delivery'?'selected':'' ?>>Delivery</option>
+            <option value="marketing" <?= $category=='marketing'?'selected':'' ?>>Marketing</option>
+            <option value="software engineer" <?= $category=='software engineer'?'selected':'' ?>>Software engineer</option>
         </select>
 
         <label>Place of Work:</label>
@@ -242,7 +319,7 @@ function getAttendancePercent($pdo, $employeeId) {
             <option value="remote" <?= $place=='remote'?'selected':'' ?>>Remote</option>
         </select>
 
-        <button type="submit">Apply</button>
+        <button type="submit" style="background:#32CD32;">Apply</button>
     </form>
 
     <!-- Employee Table -->
@@ -270,7 +347,7 @@ function getAttendancePercent($pdo, $employeeId) {
                                 <img src="../uploads/profiles/<?= htmlspecialchars($emp['profile_pic']) ?>" 
                                     alt="Profile Photo" 
                                     width="40" height="40" 
-                                    style="border-radius:50%; object-fit:cover;">
+                                    style="border-radius:50%; object-fit:cover; animation: rgbGlow 5s infinite linear;">
                             </a>
                         <?php else: ?>
                             <img src="../assets/images/default-avatar.png" 
@@ -306,12 +383,12 @@ function getAttendancePercent($pdo, $employeeId) {
                     </td>
                     <td class="actions">
                         <div class="dropdown">
-                            <button class="dropbtn">⚙️ Actions ▾</button>
+                            <button class="dropbtn" onclick="toggleDropdown(this)">⚙️ Actions ▾</button>
                             <div class="dropdown-content">
-                                <a href="edit_employee.php?id=<?= $emp['id'] ?>">✏️ Edit</a>
-                                <a href="view_attendance.php?id=<?= $emp['id'] ?>">📊 Attendance</a>
-                                <a href="../chat/chat.php?id=<?= $emp['id'] ?>">💬 Chat</a>
-                                <a href="approve_leave.php?id=<?= $emp['id'] ?>">✅ Approve Leave</a>
+                            <a href="edit_employee.php?id=<?= $emp['id'] ?>">✏️ Edit</a>
+                            <a href="view_attendance.php?id=<?= $emp['id'] ?>">📊 Attendance</a>
+                            <a href="../chat/conversation.php?id=<?= $emp['id'] ?>">💬 Chat</a>
+                            <a href="approve_leave.php?id=<?= $emp['id'] ?>">✅ Approve Leave</a>
                             </div>
                         </div>
                     </td>
@@ -319,7 +396,7 @@ function getAttendancePercent($pdo, $employeeId) {
             <?php endforeach; ?>
         </table>
     </div>
-    <h2 style="margin-top:40px;">🏆 Top Attendance This Month</h2>
+    <h2 style="color: #32CD32; margin-top:40px;">🏆 Top Attendance This Month</h2>
     <ul style="list-style:none; padding:0;">
     <?php
     $rankStmt = $pdo->query("SELECT id, fullname FROM employees");
@@ -344,6 +421,25 @@ function getAttendancePercent($pdo, $employeeId) {
     });
 </script>
 <script>
+function toggleDropdown(button) {
+  const dropdown = button.nextElementSibling;
+  const isOpen = dropdown.classList.contains('show');
+
+  // Close all dropdowns before toggling current one
+  document.querySelectorAll('.dropdown-content.show').forEach(d => {
+    if (d !== dropdown) d.classList.remove('show');
+  });
+
+  dropdown.classList.toggle('show', !isOpen);
+}
+
+// Close dropdown if clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown-content.show').forEach(d => d.classList.remove('show'));
+  }
+});
+
 document.addEventListener("DOMContentLoaded", function() {
     const charts = document.querySelectorAll("span[data-percent]");
 
@@ -388,6 +484,34 @@ document.addEventListener("DOMContentLoaded", function() {
             }]
         });
     });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const dropdowns = document.querySelectorAll('.dropdown');
+  dropdowns.forEach(dd => {
+    const btn = dd.querySelector('.dropbtn');
+    const menu = dd.querySelector('.dropdown-content');
+    if (!btn || !menu) return;
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropdowns.forEach(o => { if (o !== dd) { o.classList.remove('open'); o.querySelector('.dropbtn')?.setAttribute('aria-expanded','false'); } });
+      const willOpen = !dd.classList.contains('open');
+      dd.classList.toggle('open');
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.querySelector('.dropbtn')?.setAttribute('aria-expanded','false'); });
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.querySelector('.dropbtn')?.setAttribute('aria-expanded','false'); });
+    }
+  });
 });
 </script>
 

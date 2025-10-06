@@ -62,6 +62,15 @@ header .container {
     border: 2px solid white;
     box-shadow: 0 0 5px rgba(255,255,255,0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: rgbGlow 5s infinite linear;
+}
+
+@keyframes rgbGlow {
+  0%   { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
+  25%  { box-shadow: 0 0 15px orange, 0 0 30px orange, 0 0 45px orange; }
+  50%  { box-shadow: 0 0 15px lime, 0 0 30px lime, 0 0 45px lime; }
+  75%  { box-shadow: 0 0 15px cyan, 0 0 30px cyan, 0 0 45px cyan; }
+  100% { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
 }
 
 #logo-click:hover img {
@@ -103,121 +112,229 @@ header .container {
     border: 1px solid #e63946;
 }
 
-/* Place nav (or hamburger) on the far right */
-.radial-nav {
-  position: relative;
-  left: 50%;
-}
-
-.menu-toggle {
-  width: 50px;
-  height: 50px;
+/* === HEADER CONTAINER === */
+header {
   background: #1b263b;
-  color: #fff;
-  border-radius: 50%;
+  padding: 12px 20px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  font-size: 24px;
-  transition: background 0.3s;
+  max-width: 100%;
 }
 
-.menu-toggle:hover {
-  background: #e63946;
+header .logo {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-/* Hidden wheel */
-#radial-wheel {
+/* === RADIAL NAV === */
+.radial-nav {
+    position: absolute;
+    top: 20px;      /* adjust depending on header height */
+    right: 30px;    /* pushes it to the right side */
+    z-index: 999;
+}
+
+.radial-nav .menu-toggle {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #333;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.radial-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.radial-nav ul li {
+    margin: 5px 0;
+}
+
+.radial-nav ul li a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #444;
+    color: white;
+    transition: 0.3s;
+}
+
+.radial-nav ul li a.active {
+    background: #00aaff; /* highlight active */
+}
+
+.radial-nav ul li a:hover {
+    background: #666;
+}
+
+/* === FIX horizontal scroll issue on desktop === */
+html, body {
+  overflow-x: hidden; /* Prevent horizontal scrolling globally */
+}
+
+/* Ensure side elements don’t push beyond viewport */
+.radial-nav,
+.side-nav,
+.chat-fab {
+  right: clamp(10px, 2vw, 20px); /* Keeps inside viewport on all screen sizes */
+  max-width: 100vw;
+  overflow: visible;
+}
+
+
+
+/* Optional: prevent flex overflow inside header */
+header {
+  overflow-x: clip; /* modern replacement for hidden (more performant) */
+}
+
+/* Fix side-nav animation overshoot */
+.side-nav {
+  transform: translateX(110%);
+}
+.side-nav.open {
+  transform: translateX(0);
+}
+
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  header {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .menu-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
+
+  #radial-wheel {
+    width: 160px;
+    height: 160px;
+    margin-left: -80px;
+    margin-top: -80px;
+  }
+
+  #radial-wheel li a {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+  }
+
+}
+/* Mobile header override - right-side vertical menu */
+@media (max-width: 768px) {
+  header .container { align-items: center; }
+  nav { display: block; margin-left: auto; width: auto; }
+  nav ul {
+    display: none; /* hidden until toggled */
+    position: fixed;
+    top: 70px; /* below header */
+    right: 12px;
+    width: min(70vw, 260px);
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    flex-direction: column;
+    gap: 10px;
+    background: #1b263b;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.45);
+    z-index: 1100;
+  }
+  nav ul.show { display: flex; }
+  nav ul li { width: 100%; }
+  nav ul li a {
+    display: block;
+    width: 100%;
+    background: #32CD32;
+    color: #111;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 0 6px rgba(50,205,50,0.25);
+  }
+  nav ul li a:hover { background: #28a428; box-shadow: 0 0 10px rgba(50,205,50,0.45); }
+  .hamburger { display: flex; cursor: pointer; font-size: 24px; margin-left: 12px; }
+}
+/* Right-side vertical sidebar and hamburger */
+.side-nav { position: absolute; top: 80px; right: 12px; display: flex; flex-direction: column; z-index: 1100; }
+.side-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.side-nav a { display: flex; align-items: center; gap: 8px; background: #1b263b; color: #fff; border: 1px solid rgba(255,255,255,0.08); padding: 10px 12px; border-radius: 10px; text-decoration: none; box-shadow: 0 0 6px rgba(50,205,50,0.25); }
+.side-nav a:hover { background: #22324d; box-shadow: 0 0 10px rgba(50,205,50,0.45); }
+.side-nav a i { width: 18px; text-align: center; }
+.side-nav a span { display: inline; }
+
+.hamburger { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 6px; display: none; flex-direction: column; gap: 4px; cursor: pointer; }
+.hamburger span { width: 22px; height: 2px; background: #fff; display: block; }
+
+/* Desktop: collapsed by default, toggle with hamburger (same as mobile) */
+@media (min-width: 769px) {
+  .hamburger { display: inline-flex; }
+  .side-nav { transform: translateX(120%); opacity: 0; pointer-events: none; transition: transform 0.25s ease, opacity 0.2s ease; }
+  .side-nav.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+  .side-nav a span { display: inline; }
+}
+
+/* Mobile: collapsed by default, toggle with hamburger */
+@media (max-width: 768px) {
+  .hamburger { display: inline-flex; }
+  .side-nav { transform: translateX(120%); opacity: 0; pointer-events: none; transition: transform 0.25s ease, opacity 0.2s ease; top: 70px; }
+  .side-nav.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+}
+/* Floating chat icon badge on the right (always visible) */
+.chat-fab {
   position: absolute;
   top: 50%;
-  left: 100%;
-  width: 50px;
-  height: 50px;
-  margin-top: -10px;
-  margin-left: 100px;
-  border-radius: 50%;
-  display: none;
-  justify-content: center;
+  right: 16px;
+  transform: translateY(-50%);
+  display: inline-flex;
   align-items: center;
-  list-style: none;
-  padding: 0;
-}
-
-#radial-wheel li {
-  position: absolute;
-  transform-origin: 100px 100px;
-}
-
-#radial-wheel li a {
-  display: block;
-  width: 50px;
-  height: 50px;
-  background: #1b263b;
-  color: #fff;
-  text-align: center;
-  line-height: 50px;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  font-size: 18px;
-  transition: 0.3s;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  text-decoration: none;
+  z-index: 1200;
 }
-
-#radial-wheel li a:hover,
-#radial-wheel li a.active {
-  background: #2ecc71;
-  box-shadow: 0 0 12px #2ecc71;
+.chat-fab:hover { background: rgba(255,255,255,0.18); }
+.chat-fab .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e63946;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 2px 6px;
+  min-width: 18px;
+  line-height: 1;
+  text-align: center;
+  box-shadow: 0 0 4px rgba(0,0,0,0.4);
 }
-
-
-/* Collapse nav on mobile */
+/* Space for chat fab so it doesn't overlap side-nav/hamburger on mobile */
 @media (max-width: 768px) {
-    header .container {
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    nav {
-        display: none;
-        width: 100%;
-        margin-top: 12px;
-    }
-
-    nav ul {
-        display: none; /* hidden menu */
-        flex-direction: column;
-        position: absolute;
-        top: 70px;
-        right: 20px;
-        background: #1b263b;
-        border-radius: 6px;
-        padding: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-    }
-
-    nav ul.show {
-        display: flex;
-    }
-
-    /* Hamburger button */
-    .hamburger {
-        display:flex;
-        cursor: pointer;
-        font-size: 24px;
-        margin-left: 270px;
-    }
-
-    /* Desktop view hides hamburger */
-    .hamburger {
-        display: none;
-    }
-
-    nav.active {
-        display: flex;
-    }
-
-    .hamburger {
-        display: flex;
-    }
+  .header-content { position: relative; padding-right: 60px; }
+}
+/* Ensure side-nav list is visible when panel is open on mobile */
+@media (max-width: 768px) {
+  nav#side-nav ul { display: flex; }
 }
 </style>
 </head>
@@ -225,6 +342,13 @@ header .container {
 <header>
     <div class="container">
         <div class="header-content">
+            <?php if (isLoggedIn()): ?>
+                <?php $unreadCount = isAdmin() ? (int)($adminUnreadCount ?? 0) : (int)($employeeUnreadCount ?? 0); ?>
+                <a href="../chat/conversation.php" class="chat-fab" aria-label="Chat">
+                    <i class="fas fa-comments"></i>
+                    <?php if ($unreadCount > 0): ?><span class="badge"><?= $unreadCount ?></span><?php endif; ?>
+                </a>
+            <?php endif; ?>
             <div class="logo-and-welcome">
                 <div id="logo-click">
                     <img src="../assets/img/IROKS.jpg" alt="Website Logo" class="img-responsive">
@@ -239,26 +363,54 @@ header .container {
                 <?php endif; ?>
             </div>
 
-            <div class="radial-nav">
-  <div class="menu-toggle" onclick="toggleRadialMenu()">+</div>
-  <ul id="radial-wheel">
-    <li><a href="<?= isAdmin() ? '../admin/dashboard.php' : '../employee/dashboard.php' ?>" class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>"><i class="fas fa-home"></i></a></li>
-    
-    <?php if (!isAdmin()): ?>
-      <li><a href="../employee/upload_profile.php" class="<?= basename($_SERVER['PHP_SELF']) == 'upload_profile.php' ? 'active' : '' ?>"><i class="fas fa-user"></i></a></li>
-      <li><a href="../employee/attendance.php" class="<?= basename($_SERVER['PHP_SELF']) == 'attendance.php' ? 'active' : '' ?>"><i class="fas fa-clock"></i></a></li>
-      <li><a href="../chat/chat.php" class="<?= basename($_SERVER['PHP_SELF']) == 'chat.php' ? 'active' : '' ?>"><i class="fas fa-comments"></i></a></li>
-    <?php else: ?>
-      <li><a href="../admin/employees.php" class="<?= basename($_SERVER['PHP_SELF']) == 'employees.php' ? 'active' : '' ?>"><i class="fas fa-users"></i></a></li>
-      <li><a href="../admin/view_attendance.php" class="<?= basename($_SERVER['PHP_SELF']) == 'view_attendance.php' ? 'active' : '' ?>"><i class="fas fa-calendar-check"></i></a></li>
-      <li><a href="../chat/chat.php" class="<?= basename($_SERVER['PHP_SELF']) == 'chat.php' ? 'active' : '' ?>"><i class="fas fa-comments"></i></a></li>
-    <?php endif; ?>
+            <!-- Right-aligned vertical navigation -->
+            <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <nav id="side-nav" class="side-nav" aria-hidden="true">
+                <ul>
+                    <li>
+                        <a href="<?= isAdmin() ? '../admin/dashboard.php' : '../employee/dashboard.php' ?>" title="Dashboard">
+                            <i class="fas fa-home"></i><span>Dashboard</span>
+                        </a>
+                    </li>
 
-    <li><a href="../logout.php"><i class="fas fa-sign-out-alt"></i></a></li>
-  </ul>
-</div>
+                    <?php if (!isAdmin()): ?>
+                        <li>
+                            <a href="../employee/upload_profile.php" title="My Profile">
+                                <i class="fas fa-user"></i><span>My Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../employee/attendance.php" title="My Attendance">
+                                <i class="fas fa-clock"></i><span>My Attendance</span>
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li>
+                            <a href="../admin/request.php" title="Employees">
+                                <i class="fas fa-users"></i><span>Request</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../admin/view_attendance.php" title="Attendance Records">
+                                <i class="fas fa-calendar-check"></i><span>Attendance</span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-
+                    <li>
+                        <a href="../chat/conversation.php" title="Chat">
+                            <i class="fas fa-comments"></i><span>Chat</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../logout.php" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </header>
@@ -307,22 +459,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function toggleRadialMenu() {
-  const menu = document.getElementById("radial-wheel");
-  menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('hamburger-btn');
+  const side = document.getElementById('side-nav');
+  if (!btn || !side) return;
+  btn.addEventListener('click', function () {
+    side.classList.toggle('open');
+    const isOpen = side.classList.contains('open');
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    side.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  });
+});
 
-  if (menu.style.display === "flex") {
-    const items = menu.querySelectorAll("li");
-    const total = items.length;
-    const angleStep = 360 / total;
-
-    items.forEach((item, index) => {
-      const angle = index * angleStep - 90; // Start top
-      const x = 80 * Math.cos(angle * Math.PI / 180);
-      const y = 80 * Math.sin(angle * Math.PI / 180);
-      item.style.transform = `translate(${x}px, ${y}px)`;
-    });
-  }
-}
 
 </script>
