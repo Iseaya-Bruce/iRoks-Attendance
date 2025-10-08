@@ -397,6 +397,11 @@ header {
                                 <i class="fas fa-calendar-check"></i><span>Attendance</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="../admin/holidays.php" title="Attendance Records">
+                                <i class="fas fa-calendar-check"></i><span>Manage Holidays</span>
+                            </a>
+                        </li>
                     <?php endif; ?>
 
                     <li>

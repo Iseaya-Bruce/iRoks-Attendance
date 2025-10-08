@@ -99,180 +99,181 @@ function getAttendancePercent($pdo, $employeeId) {
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 5px; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
         th { color: #32CD32; background: #222; }
-        td:hover {transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,255,100,0.4);} 
+        td:hover { box-shadow: 0 0 25px rgba(0,255,100,0.4);} 
         tr:hover { background: #2a2a2a; }
-.actions a {
-  display: block;
-  margin: 6px 0;
-  padding: 6px 10px;
-  background: #32CD32;
-  color: #111;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 14px;
-  opacity: 0;
-  transform: translateY(-5px);
-  animation: none;
-  transition: background 0.2s ease;
-}
-.actions a:hover {
-  background: #28a428;
-}
-
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropbtn {
-  background: #444;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-.dropbtn:hover {
-  background: #555;
-}
-
-.dropdown-content {
-  position: absolute;
-  background: #f1f1f1;
-  min-width: 160px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  padding: 8px;
-  z-index: 1;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-/* When active */
-.dropdown-content.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Animate links 1-by-1 */
-.dropdown-content.show a {
-  animation: fadeSlideIn 0.4s ease forwards;
-}
-.dropdown-content.show a:nth-child(1) { animation-delay: 0.15s; }
-.dropdown-content.show a:nth-child(2) { animation-delay: 0.25s; }
-.dropdown-content.show a:nth-child(3) { animation-delay: 0.35s; }
-.dropdown-content.show a:nth-child(4) { animation-delay: 0.45s; }
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dropdown-content a:hover {
-  background: #dfffdc;
-  box-shadow: 0 0 6px rgba(0,0,0,0.08);
-}
-
-@keyframes rgbGlow {
-  0%   { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
-  25%  { box-shadow: 0 0 15px orange, 0 0 30px orange, 0 0 45px orange; }
-  50%  { box-shadow: 0 0 15px lime, 0 0 30px lime, 0 0 45px lime; }
-  75%  { box-shadow: 0 0 15px cyan, 0 0 30px cyan, 0 0 45px cyan; }
-  100% { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Mobile adjustments for dropdown */
-@media (max-width: 768px) {
-    .dropdown { position: static; }
-    .dropdown .dropbtn { width: auto; }
-    .dropdown .dropdown-content {
-        right: 12px;
-        left: auto;
-        min-width: min(80vw, 280px);
-    }
-}
-
-/* ✅ Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        margin: 15px;
-        padding: 15px;
-    }
-
-    .profile {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .profile img {
-        width: 70px;
-        height: 70px;
-    }
-
-    .actions {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .btn, .btn-clock, button {
-        width: 100%;
-        text-align: center;
-    }
-
-    /* 🔹 Make tables scrollable */
-    .table-wrapper {
-        overflow-x: auto;
-    }
-
-    table {
-        min-width: 600px; /* so it scrolls instead of shrinking too much */
-    }
-
-    table, th, td {
+        .actions a {
+        display: block;
+        margin: 6px 0;
+        padding: 6px 10px;
+        background: #32CD32;
+        color: #111;
+        text-decoration: none;
+        border-radius: 6px;
         font-size: 14px;
+        opacity: 0;
+        transform: translateY(-5px);
+        animation: none;
+        transition: 0.2s ease;
+        }
+        .actions a:hover {
+        background: #28a428;
+        box-shadow: 0 0 25px rgba(0,255,100,0.4);
+        }
+
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+
+        .dropbtn {
+        background: #444;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        }
+        .dropbtn:hover {
+        background: #555;
+        }
+
+        .dropdown-content {
+        position: absolute;
+        background: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
         padding: 8px;
-    }
-}
+        z-index: 1;
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        }
 
-@media (max-width: 480px) {
-    h1, h2 {
-        font-size: 20px;
-    }
+        /* When active */
+        .dropdown-content.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+        }
 
-    .container {
-        padding: 10px;
-    }
+        /* Animate links 1-by-1 */
+        .dropdown-content.show a {
+        animation: fadeSlideIn 0.4s ease forwards;
+        }
+        .dropdown-content.show a:nth-child(1) { animation-delay: 0.15s; }
+        .dropdown-content.show a:nth-child(2) { animation-delay: 0.25s; }
+        .dropdown-content.show a:nth-child(3) { animation-delay: 0.35s; }
+        .dropdown-content.show a:nth-child(4) { animation-delay: 0.45s; }
 
-    .profile img {
-        width: 60px;
-        height: 60px;
-    }
+        @keyframes fadeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
 
-    table, th, td {
-        font-size: 12px;
-        padding: 6px;
-    }
-}
+        .dropdown-content a:hover {
+        background: #dfffdc;
+        box-shadow: 0 0 6px rgba(0,0,0,0.08);
+        }
+
+        @keyframes rgbGlow {
+        0%   { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
+        25%  { box-shadow: 0 0 15px orange, 0 0 30px orange, 0 0 45px orange; }
+        50%  { box-shadow: 0 0 15px lime, 0 0 30px lime, 0 0 45px lime; }
+        75%  { box-shadow: 0 0 15px cyan, 0 0 30px cyan, 0 0 45px cyan; }
+        100% { box-shadow: 0 0 15px red, 0 0 30px red, 0 0 45px red; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile adjustments for dropdown */
+        @media (max-width: 768px) {
+            .dropdown { position: static; }
+            .dropdown .dropbtn { width: auto; }
+            .dropdown .dropdown-content {
+                right: 12px;
+                left: auto;
+                min-width: min(80vw, 280px);
+            }
+        }
+
+        /* ✅ Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 15px;
+                padding: 15px;
+            }
+
+            .profile {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .btn, .btn-clock, button {
+                width: 100%;
+                text-align: center;
+            }
+
+            /* 🔹 Make tables scrollable */
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px; /* so it scrolls instead of shrinking too much */
+            }
+
+            table, th, td {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1, h2 {
+                font-size: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .profile img {
+                width: 60px;
+                height: 60px;
+            }
+
+            table, th, td {
+                font-size: 12px;
+                padding: 6px;
+            }
+        }
     </style>
 </head>
 <body>

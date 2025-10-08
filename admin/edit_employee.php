@@ -30,10 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $expected_clockout = $_POST['expected_clockout'] !== '' ? $_POST['expected_clockout'] : null;
     $hourly_pay = $_POST['hourly_pay'] !== '' ? (float)$_POST['hourly_pay'] : 0.00;
     $monthly_pay = $_POST['monthly_pay'] !== '' ? (float)$_POST['monthly_pay'] : 0.00;
+
     // Checkbox: if present -> 1, otherwise -> 0
     $overtime_applicable = isset($_POST['overtime_applicable']) ? 1 : 0;
-
     // Update query (add/remove columns as needed to match your schema)
+    $late_fee_applicable = isset($_POST['late_fee_applicable']) ? 1 : 0;
+
     $upd = $pdo->prepare("UPDATE employees SET
             fullname = ?,
             role = ?,
@@ -44,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             expected_clockout = ?,
             hourly_pay = ?,
             monthly_pay = ?,
-            overtime_applicable = ?
+            overtime_applicable = ?,
+            late_fee_applicable = ?
         WHERE id = ?");
 
     $upd->execute([
@@ -58,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hourly_pay,
         $monthly_pay,
         $overtime_applicable,
+        $late_fee_applicable,
         $id
     ]);
 
@@ -143,6 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label style="display:flex;align-items:center;gap:8px;">
             <input type="checkbox" name="overtime_applicable" value="1" <?= (!empty($emp['overtime_applicable']) ? 'checked' : '') ?>>
             Overtime applies for this role
+        </label>
+
+        <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" name="late_fee_applicable" value="1" <?= (!empty($emp['late_fee_applicable']) ? 'checked' : '') ?>>
+            Late fee applies for this role
         </label>
 
         <button type="submit" class="btn">Save Changes</button>
