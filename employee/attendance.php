@@ -269,8 +269,8 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
         </div>
     </section>
 
-    <a href="../pdf/export_timesheet.php?month=<?=sprintf('%02d',$selMonth)?>&year=<?=$selYear?>" class="btn">
-        Download PDF Report
+    <a href="../pdf/generate.php?month=<?=sprintf('%02d',$selMonth)?>&year=<?=$selYear?>" class="btn">
+        View PDF Report
     </a>
 </main>
 </body>

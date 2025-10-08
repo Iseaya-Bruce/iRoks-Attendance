@@ -232,9 +232,9 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
     <!-- PDF/Timesheet links (note: export_timesheet currently ignores month filter) -->
     <div style="margin-top:12px; display:flex; gap:10px; flex-wrap: wrap;">
         <a href="../pdf/generate.php?id=<?= (int)$selectedId ?>" class="export">👁️ View Timesheet</a>
-        <form method="post" action="../pdf/export_timesheet.php" style="display:inline;">
+        <!--form method="post" action="../pdf/export_timesheet.php" style="display:inline;">
             <input type="hidden" name="id" value="<?= (int)$selectedId ?>">
-            <button type="submit" class="export">📄 Export as PDF</button>
+            <button type="submit" class="export">📄 Export as PDF</button-->
         </form>
     </div>
 

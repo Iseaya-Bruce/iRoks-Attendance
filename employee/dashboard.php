@@ -484,7 +484,7 @@ textarea {
 
         <!-- Other actions -->
         <a href="../pdf/generate.php?id=<?= $emp['id'] ?>" class="btn btn-chat">👁️ View Timesheet</a>
-        <a href="../pdf/generate.php?id=<?= $emp['id'] ?>" class="btn btn-pdf">📄 Export as PDF</a>
+        <!--a href="../pdf/generate.php?id=<?= $emp['id'] ?>" class="btn btn-pdf">📄 Export as PDF</a-->
         <a href="../chat/conversation.php" class="btn btn-chat">💬 Chat with Admin</a>
         <a href="upload_profile.php" class="btn btn-upload">📷 Upload Picture</a>
         <a href="request_leave.php" class="btn btn-anim-plane"><span class="icon-plane">✈</span> Request Leave</a>
