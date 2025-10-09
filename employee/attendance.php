@@ -80,8 +80,7 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
         }
         table th, table td {
             padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease;
         }
         table th {
             background: #333;

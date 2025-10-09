@@ -49,57 +49,107 @@ if (!$employee) {
 // ---- HTML Form for date selection ----
 if (!isset($_GET['download'])) {
     echo '<!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Generate Timesheet</title>
         <style>
             body {
-                font-family: Arial, sans-serif;
-                background: #f5f6f8;
+                font-family: "Poppins", Arial, sans-serif;
+                background: #0a0f0a;
+                color: #e8f5e9;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 height: 100vh;
                 margin: 0;
+                padding: 15px;
             }
+
             .form-container {
-                background: #fff;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                width: 350px;
+                background: rgba(0, 20, 0, 0.7);
+                border: 2px solid #00ff80;
+                border-radius: 16px;
+                box-shadow: 0 0 20px rgba(0, 255, 128, 0.3);
+                padding: 30px 25px;
+                width: 100%;
+                max-width: 400px;
                 text-align: center;
+                animation: glowPulse 2.5s infinite alternate;
             }
+
+            @keyframes glowPulse {
+                from { box-shadow: 0 0 10px #00ff80; }
+                to { box-shadow: 0 0 25px #00ff80; }
+            }
+
             h2 {
-                color: #333;
-                margin-bottom: 20px;
+                color: #00ff80;
+                margin-bottom: 25px;
+                text-shadow: 0 0 5px #00ff80;
             }
+
             label {
-                font-weight: bold;
                 display: block;
-                margin-top: 10px;
-            }
-            input[type="date"] {
-                width: 90%;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                margin-top: 5px;
-            }
-            button {
-                margin-top: 20px;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 6px;
-                background: #007bff;
-                color: #fff;
-                cursor: pointer;
+                text-align: left;
+                font-weight: 600;
+                color: #c9ffd9;
+                margin-top: 15px;
                 font-size: 14px;
             }
+
+            input[type="date"] {
+                width: 90%;
+                padding: 10px;
+                border: 2px solid #00ff80;
+                border-radius: 8px;
+                background: #0d1b0d;
+                color: #c8f7c5;
+                margin-top: 6px;
+                font-size: 15px;
+                transition: all 0.3s ease;
+                outline: none;
+            }
+
+            input[type="date"]:focus {
+                box-shadow: 0 0 10px #00ff80;
+                border-color: #00ff80;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 25px;
+                padding: 12px;
+                border: 2px solid #00ff80;
+                border-radius: 8px;
+                background: #00ff80;
+                color: #0a0f0a;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
             button:hover {
-                background: #0056b3;
+                background: #0a0f0a;
+                color: #00ff80;
+                box-shadow: 0 0 15px #00ff80;
+            }
+
+            @media (max-width: 480px) {
+                .form-container {
+                    padding: 25px 20px;
+                    width: 100%;
+                    max-width: 260px;
+                }
+                h2 {
+                    font-size: 20px;
+                }
+                button {
+                    font-size: 14px;
+                }
             }
         </style>
     </head>
@@ -108,6 +158,7 @@ if (!isset($_GET['download'])) {
             <h2>Generate Timesheet</h2>
             <form method="get" action="">
                 <input type="hidden" name="id" value="' . htmlspecialchars($employeeId) . '">
+
                 <label>Start Date:</label>
                 <input type="date" name="start" required value="' . date('Y-m-01') . '">
 

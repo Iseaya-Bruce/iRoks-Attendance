@@ -77,10 +77,10 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
         a.back { color: #32CD32; text-decoration: none; display: inline-block; margin-bottom: 15px; }
         .summary { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        table th, table td { padding: 10px; border: 1px solid #333; text-align: center; }
+        table th, table td { padding: 10px; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
         table th { background: #222; color: #fff; }
         .summary-cards { display: flex; gap: 20px; margin: 20px 0; }
-        .card { flex: 1; background: #222; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+        .card { flex: 1; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
         .export { margin-top: 20px; display: inline-block; background: #32CD32; color: #111; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
         .export:hover { background: #28a428; }
 
