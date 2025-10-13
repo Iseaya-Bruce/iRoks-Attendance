@@ -64,6 +64,8 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
             display: flex;
             gap: 20px;
             margin: 20px 0;
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
         }
         .card {
             flex: 1;
@@ -71,7 +73,8 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
             padding: 15px;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
         }
         table {
             width: 100%;

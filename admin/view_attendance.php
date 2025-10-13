@@ -72,7 +72,8 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         body { background: #111; color: #fff; font-family: Arial, sans-serif; }
-        .container { max-width: 1100px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;}
         h1, h2 { color: #32CD32; }
         a.back { color: #32CD32; text-decoration: none; display: inline-block; margin-bottom: 15px; }
         .summary { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; }

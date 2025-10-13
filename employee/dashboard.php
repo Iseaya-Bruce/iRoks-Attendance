@@ -79,7 +79,7 @@ $monthly_salary = $emp['monthly_pay'] ?? ($total_hours * $hourly_rate);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    
  <style>
-        body { 
+    body { 
     background: #111; 
     color: #fff; 
     font-family: Arial, sans-serif; 
@@ -90,6 +90,8 @@ $monthly_salary = $emp['monthly_pay'] ?? ($total_hours * $hourly_rate);
     padding: 20px; 
     background: #1a1a1a; 
     border-radius: 12px; 
+    border: 2px solid #00ff7f;
+    box-shadow: 0 0 20px #00ff7f;
 }
 h1, h2 { 
     color: #32CD32; 
@@ -114,6 +116,8 @@ h1, h2 {
     background: #222; 
     padding: 15px; 
     border-radius: 8px; 
+    border: 2px solid #00ff7f;
+    box-shadow: 0 0 20px #00ff7f;
 }
 table { 
     width: 100%; 
@@ -334,6 +338,8 @@ textarea {
     background: #222; 
     border: none; 
     color: #fff; 
+    border: 2px solid #00ff7f;
+    box-shadow: 0 0 20px #00ff7f;
 }
 
 /* ✅ Responsive Design */

@@ -92,7 +92,8 @@ function getAttendancePercent($pdo, $employeeId) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background: #111; color: #fff; font-family: Arial, sans-serif; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f; }
         h1 { color: #32CD32; }
         .filters { margin-bottom: 20px; }
         .filters select { padding: 6px; margin-right: 10px; color: #32CD32; }
