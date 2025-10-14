@@ -96,6 +96,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 <link rel="stylesheet" href="../assets/css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
+         body { 
+            background: #111; 
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 30px auto; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            border-radius: 12px; 
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+        }
      /* Glowing button animation */
         .btn {
             position: relative;
@@ -135,6 +149,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
         .file-input-wrapper {
             margin-top: 15px; 
+        }
+        label {
+            font-weight: bold;
+             color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+        }
+        h2 {
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+        }
+        h3 {
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
         }
 </style>
 </head>

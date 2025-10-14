@@ -60,6 +60,16 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
     <title>My Attendance - iRoks</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
+        .container { 
+            max-width: 1000px; 
+            margin: 30px auto; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            border-radius: 12px; 
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+        }
+
         .summary-cards {
             display: flex;
             gap: 20px;
