@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
         }
 
         .file-input-wrapper {
-            margin-top: 15px;
+            margin-top: 15px; 
         }
 </style>
 </head>

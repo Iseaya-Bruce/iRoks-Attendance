@@ -43,6 +43,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
       padding: 20px;
+       border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
     }
 
     .card {

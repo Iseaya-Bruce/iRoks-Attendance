@@ -80,8 +80,22 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         table th, table td { padding: 10px; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
         table th { background: #222; color: #fff; }
-        .summary-cards { display: flex; gap: 20px; margin: 20px 0; }
-        .card { flex: 1; box-shadow: 0 0 15px rgba(0, 255, 100, 0.25); border: 1px solid rgba(0,255,100,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center; animation: fadeInUp 0.7s ease; }
+        .summary-cards {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+        }
+        .card {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+        }
         .export { margin-top: 20px; display: inline-block; background: #32CD32; color: #111; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
         .export:hover { background: #28a428; }
 
@@ -104,11 +118,12 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
         .emp-chip.active { background:#32CD32; color:#111; box-shadow: 0 0 12px rgba(50,205,50,0.65); }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
             .container { margin: 15px; padding: 15px; }
-            .summary-cards { flex-direction: column; gap: 10px; }
+            .summary-cards { flex-direction: row; gap: 10px; }
             .table-wrapper { overflow-x: auto; }
             table { min-width: 700px; }
+            .salary-summary .card { background:#222; color:#fff; }
         }
     </style>
 </head>

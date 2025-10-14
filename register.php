@@ -45,6 +45,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - iRoks</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            background: radial-gradient(circle at center, #001a00, #000);
+            color: #e0ffe0;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h2 {
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #b5f7b5;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ff7f;
+            background: transparent;
+            color: #06f306ff;
+            font-size: 15px;
+            outline: none;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 10px #00ff7f;
+            background: rgba(7, 7, 7, 0.97);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #00ff7f;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #00ff7f;
+        }
+
+        .btn:hover {
+            background: #00cc66;
+            box-shadow: 0 0 20px #00ff7f;
+        }
+
+        p {
+            color: #b5f7b5;
+            margin-top: 15px;
+        }
+
+        a {
+            color: #00ff7f;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-shadow: 0 0 10px #00ff7f;
+        }
+
+        .alert.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff4d4d;
+            color: #ffb3b3;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+            input, select {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body class="page-register">
 <div class="card">

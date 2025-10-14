@@ -54,7 +54,8 @@ $holidays = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
 /* keep the styling simple / similar to your theme */
 body { background:#111; color:#fff; font-family: Arial, sans-serif; }
-.container { max-width:780px; margin:36px auto; padding:20px; background:#1a1a1a; border-radius:10px; box-shadow:0 0 12px rgba(50,205,50,0.12); }
+.container { max-width:780px; margin:36px auto; padding:20px; background:#1a1a1a; border-radius:10px; border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f; }
 h2 { color:#32CD32; text-align:center; margin-bottom:16px; }
 form { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
 .row { display:flex; gap:8px; }
@@ -67,7 +68,12 @@ button:hover { background:#28a428; }
 .msg { text-align:center; margin-bottom:10px; }
 .err { color:#ffb3b3; text-align:center; margin-bottom:10px; }
 .delete-btn { color:#ff7777; text-decoration:none; font-weight:600; }
-@media (min-width:700px) { .row > * { flex:1; } .row textarea { flex:2; } }
+@media (max-width:480px) { .row > * { flex:1; } .row textarea { flex:2; } 
+    /* 🔹 Make tables scrollable */
+    .table-wrapper {
+        overflow-x: auto;
+    }
+  }
 </style>
 </head>
 <body>
@@ -83,7 +89,7 @@ button:hover { background:#28a428; }
   <?php endif; ?>
 
   <form method="post" novalidate>
-    <div style="text-align:right"><a href="fetch_holidays.php" class="btn-refresh">🔄 Fetch Latest Holidays</a></div>
+    <div style="text-align:right; text-decoration: underline"><a href="fetch_holidays.php" class="btn-refresh">🔄 Fetch Latest Holidays</a></div>
     <div class="row">
       <input type="text" name="holiday_name" placeholder="Holiday name" required>
       <input type="date" name="holiday_date" required>
@@ -97,22 +103,24 @@ button:hover { background:#28a428; }
   <?php if (count($holidays) === 0): ?>
     <p style="text-align:center; color:#ccc;">No holidays defined yet.</p>
   <?php else: ?>
-    <table class="table">
-      <thead>
-        <tr><th>ID</th><th>Name</th><th>Date</th><th>Description</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        <?php foreach ($holidays as $h): ?>
-          <tr>
-            <td><?= (int)$h['id'] ?></td>
-            <td><?= htmlspecialchars($h['holiday_name'] ?? $h['description']) ?></td>
-            <td><?= htmlspecialchars($h['holiday_date']) ?></td>
-            <td><?= htmlspecialchars($h['description'] ?? '') ?></td>
-            <td><a class="delete-btn" href="?delete=<?= (int)$h['id'] ?>" onclick="return confirm('Delete this holiday?')">Delete</a></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table >
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Date</th><th>Description</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <?php foreach ($holidays as $h): ?>
+            <tr>
+              <td><?= (int)$h['id'] ?></td>
+              <td><?= htmlspecialchars($h['holiday_name'] ?? $h['description']) ?></td>
+              <td><?= htmlspecialchars($h['holiday_date']) ?></td>
+              <td><?= htmlspecialchars($h['description'] ?? '') ?></td>
+              <td><a class="delete-btn" href="?delete=<?= (int)$h['id'] ?>" onclick="return confirm('Delete this holiday?')">Delete</a></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   <?php endif; ?>
 
 </div>

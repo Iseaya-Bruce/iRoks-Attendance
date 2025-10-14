@@ -70,60 +70,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body.page-login {
-            background: linear-gradient(135deg, #1e88e5, #42a5f5);
+             background: radial-gradient(circle at center, #001a00, #000);
+            color: #e0ffe0;
             font-family: 'Poppins', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
         .card {
-            background: white;
-            padding: 35px;
+             background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
             border-radius: 15px;
-            width: 350px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
             text-align: center;
+            animation: fadeIn 0.8s ease;
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         h2 {
-            margin-top: 10px;
-            color: #333;
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+            margin-bottom: 25px;
         }
+
         label {
             display: block;
             text-align: left;
-            margin: 15px 0 5px;
-            font-weight: 500;
-            color: #333;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #b5f7b5;
         }
         input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
+            padding: 10px;
             border-radius: 8px;
+            border: 1px solid #00ff7f;
+            background: transparent;
+            color: #06f306ff;
             font-size: 15px;
             outline: none;
-            transition: border-color 0.3s;
+            margin-top: 5px;
+            transition: all 0.3s ease;
         }
         input:focus {
-            border-color: #1e88e5;
+            box-shadow: 0 0 10px #00ff7f;
+            background: rgba(7, 7, 7, 0.97);
         }
         .btn {
-            width: 100%;
-            background-color: #1e88e5;
-            color: white;
+           width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #00ff7f;
+            color: #000;
             border: none;
-            padding: 10px;
-            margin-top: 15px;
             border-radius: 8px;
-            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #00ff7f;
         }
         .btn:hover {
-            background-color: #42a5f5;
-            transform: scale(1.03);
+            background: #00cc66;
+            box-shadow: 0 0 20px #00ff7f;
         }
         .alert.error {
             background-color: #f8d7da;
@@ -135,30 +153,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-align: left;
         }
         p {
+            color: #b5f7b5;
             margin-top: 15px;
-            color: #444;
         }
-        p a {
-            color: #1e88e5;
+
+        a {
+            color: #00ff7f;
             text-decoration: none;
             font-weight: bold;
-            transition: color 0.3s, transform 0.3s;
         }
-        p a:hover {
-            color: #1565c0;
-            transform: scale(1.05);
+
+        a:hover {
+            text-shadow: 0 0 10px #00ff7f;
         }
         @media (max-width: 480px) {
             .card {
-                width: 90%;
-                padding: 25px;
+                padding: 20px;
+            }
+            input, select {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body class="page-login">
 <div class="card">
-    <img src="assets/img/IROKS.jpg" alt="iRoks" style="width:120px;margin:0 auto;display:block;">
+    <img src="assets/img/IROKS.jpg" alt="iRoks" style="width:120px;margin:0 auto;display:block; border: 2px solid #00ff7f;box-shadow: 0 0 20px #00ff7f;">
     <h2>Login</h2>
 
     <?php if ($errors): ?>

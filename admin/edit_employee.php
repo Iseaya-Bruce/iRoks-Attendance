@@ -70,34 +70,147 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Employee - iRoks</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        body { background: #111; color: #fff; font-family: Arial, sans-serif; }
-        .container { max-width: 700px; margin: 30px auto; padding: 20px; background: #1a1a1a; border-radius: 12px; }
-        h1 { color: #32CD32; margin-bottom: 20px; }
-        form { display: grid; gap: 12px; }
-        label { font-weight: bold; color: #cfd8dc; }
-        input, select { width: 100%; padding: 8px; border-radius: 6px; border: none; background: #222; color: #fff; }
-        .btn { padding: 10px; border: none; background: #32CD32; color: #111; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        .success { background: #163a16; color: #bff6bf; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
+        body {
+            background: radial-gradient(circle at center, #001a00, #000);
+            color: #e0ffe0;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h2 {
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #b5f7b5;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #00ff7f;
+            background: transparent;
+            color: #06f306ff;
+            font-size: 15px;
+            outline: none;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 10px #00ff7f;
+            background: rgba(7, 7, 7, 0.97);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #00ff7f;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #00ff7f;
+        }
+
+        .btn:hover {
+            background: #00cc66;
+            box-shadow: 0 0 20px #00ff7f;
+        }
+
+        p {
+            color: #b5f7b5;
+            margin-top: 15px;
+        }
+
+        a {
+            color: #00ff7f;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-shadow: 0 0 10px #00ff7f;
+        }
+
+        .alert.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff4d4d;
+            color: #ffb3b3;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert.success {
+            background: rgba(0, 255, 127, 0.1);
+            border: 1px solid #00ff7f;
+            color: #b5f7b5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 20px; }
+            input, select { font-size: 14px; }
+        }
     </style>
 </head>
-<body>
-<div class="container">
-    <a href="dashboard.php" style="color:#32CD32; text-decoration:none;">← Back to Dashboard</a>
-    <h1>Edit Employee</h1>
+<body class="page-edit-employee">
+<div class="card">
+    <div style="text-align:left; margin-bottom:10px;"><a href="dashboard.php">&larr; Back to Dashboard</a></div>
+    <h2>Edit Employee</h2>
 
     <?php if (isset($_GET['updated'])): ?>
-        <div class="success">Employee updated successfully.</div>
+        <div class="alert success">Employee updated successfully.</div>
     <?php endif; ?>
 
     <form method="post">
-        <label>Full Name</label>
-        <input type="text" name="fullname" value="<?= htmlspecialchars($emp['fullname']) ?>" required>
+        <label>Full Name
+            <input type="text" name="fullname" value="<?= htmlspecialchars($emp['fullname']) ?>" required>
+        </label>
 
         <label>Role</label>
         <select name="role" required>
@@ -122,8 +235,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label>Shift</label>
         <select name="shift" required>
-            <option value="shift_1" <?= ($emp['shift']=='shift_1') ? 'selected' : '' ?>>Shift 1 (07:45 - 15:45)</option>
-            <option value="shift_2" <?= ($emp['shift']=='shift_2') ? 'selected' : '' ?>>Shift 2 (15:45 - 23:45)</option>
+            <option value="shift_1" <?= ($emp['shift']=='shift_1') ? 'selected' : '' ?>>Shift 1 (07:45–15:45)</option>
+            <option value="shift_2" <?= ($emp['shift']=='shift_2') ? 'selected' : '' ?>>Shift 2 (15:30–23:30)</option>
         </select>
 
         <label>Place of Work</label>
@@ -132,17 +245,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <option value="remote" <?= ($emp['place_of_work']=='remote') ? 'selected' : '' ?>>Remote</option>
         </select>
 
-        <label>Expected Clock-in</label>
-        <input type="time" name="expected_clockin" value="<?= htmlspecialchars($emp['expected_clockin'] ?? '') ?>">
+        <label>Expected Clock-in
+            <input type="time" name="expected_clockin" value="<?= htmlspecialchars($emp['expected_clockin'] ?? '') ?>">
+        </label>
 
-        <label>Expected Clock-out</label>
-        <input type="time" name="expected_clockout" value="<?= htmlspecialchars($emp['expected_clockout'] ?? '') ?>">
+        <label>Expected Clock-out
+            <input type="time" name="expected_clockout" value="<?= htmlspecialchars($emp['expected_clockout'] ?? '') ?>">
+        </label>
 
-        <label>Hourly Pay (SRD)</label>
-        <input type="number" step="0.01" name="hourly_pay" value="<?= htmlspecialchars($emp['hourly_pay'] ?? '0.00') ?>">
+        <label>Hourly Pay (SRD)
+            <input type="number" step="0.01" name="hourly_pay" value="<?= htmlspecialchars($emp['hourly_pay'] ?? '0.00') ?>">
+        </label>
 
-        <label>Monthly Pay (SRD)</label>
-        <input type="number" step="0.01" name="monthly_pay" value="<?= htmlspecialchars($emp['monthly_pay'] ?? '0.00') ?>">
+        <label>Monthly Pay (SRD)
+            <input type="number" step="0.01" name="monthly_pay" value="<?= htmlspecialchars($emp['monthly_pay'] ?? '0.00') ?>">
+        </label>
 
         <label style="display:flex;align-items:center;gap:8px;">
             <input type="checkbox" name="overtime_applicable" value="1" <?= (!empty($emp['overtime_applicable']) ? 'checked' : '') ?>>

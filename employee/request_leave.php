@@ -39,7 +39,8 @@ $leave_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: #1a1a1a;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f;
         }
         h1 {
             text-align: center;

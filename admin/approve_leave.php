@@ -26,7 +26,8 @@ $requests = $stmt->fetchAll();
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         body { background: #111; color: #fff; font-family: Arial, sans-serif; }
-        .container { max-width: 1000px; margin: 40px auto; background: #1a1a1a; padding: 20px; border-radius: 12px; }
+        .container { max-width: 1000px; margin: 40px auto; background: #1a1a1a; padding: 20px; border-radius: 12px; border: 2px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f; }
         h1 { color: #32CD32; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 10px; border-bottom: 1px solid #333; text-align: center; }
