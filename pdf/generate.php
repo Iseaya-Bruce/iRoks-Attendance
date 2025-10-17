@@ -1,14 +1,19 @@
 <?php
 // pdf/generate.php
-ob_start(); // capture accidental output so FPDF can send headers
+ob_start(); 
 require_once __DIR__ . '/../includes/auth.php';
-require_login('any'); // allow admin or employee
+require_login('any'); 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/fpdf.php';
 
+function formatHoursMinutes($decimalHours) {
+    $hours = floor($decimalHours);
+    $minutes = round(($decimalHours - $hours) * 60);
+    return $minutes > 0 ? "{$hours}h {$minutes}m" : "{$hours}h";
+}
+
 $user = $_SESSION['user'];
 
-// Determine employee
 if ($user['type'] === 'admin' && isset($_GET['id'])) {
     $employeeId = (int) $_GET['id'];
 } else {
@@ -19,12 +24,9 @@ if ($user['type'] === 'admin' && isset($_GET['id'])) {
     $employeeId = (int) $user['id'];
 }
 
-// 📅 Date range selection
 if (!empty($_GET['start']) && !empty($_GET['end'])) {
     $periodStart = date('Y-m-d', strtotime($_GET['start']));
     $periodEnd   = date('Y-m-d', strtotime($_GET['end']));
-    
-    // Extract year and month for filename
     $y = date('Y', strtotime($periodStart));
     $m = date('m', strtotime($periodStart));
 } else {
@@ -33,12 +35,10 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
     $periodStart = sprintf('%04d-%02d-01', $y, $m);
     $periodEnd   = date('Y-m-t', strtotime($periodStart));
 }
-
 $year = $y;
 $month = $m;
 
-// Fetch employee (including expected shift times if present)
-$empStmt = $pdo->prepare("SELECT fullname, role, hourly_pay, overtime_applicable, late_fee_applicable, expected_clockin, expected_clockout FROM employees WHERE id = ?");
+$empStmt = $pdo->prepare("SELECT fullname, role, hourly_pay, overtime_applicable, late_fee_applicable, expected_clockin, expected_clockout, paid_day FROM employees WHERE id = ?");
 $empStmt->execute([$employeeId]);
 $employee = $empStmt->fetch(PDO::FETCH_ASSOC);
 if (!$employee) {
@@ -46,7 +46,6 @@ if (!$employee) {
     die("Employee not found.");
 }
 
-// ---- HTML Form for date selection ----
 if (!isset($_GET['download'])) {
     echo '<!DOCTYPE html>
     <html lang="en">
@@ -55,6 +54,7 @@ if (!isset($_GET['download'])) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Generate Timesheet</title>
         <style>
+            /* ... your existing CSS styles ... */
             body {
                 font-family: "Poppins", Arial, sans-serif;
                 background: #0a0f0a;
@@ -67,7 +67,6 @@ if (!isset($_GET['download'])) {
                 margin: 0;
                 padding: 15px;
             }
-
             .form-container {
                 background: rgba(0, 20, 0, 0.7);
                 border: 2px solid #00ff80;
@@ -79,18 +78,15 @@ if (!isset($_GET['download'])) {
                 text-align: center;
                 animation: glowPulse 2.5s infinite alternate;
             }
-
             @keyframes glowPulse {
                 from { box-shadow: 0 0 10px #00ff80; }
                 to { box-shadow: 0 0 25px #00ff80; }
             }
-
             h2 {
                 color: #00ff80;
                 margin-bottom: 25px;
                 text-shadow: 0 0 5px #00ff80;
             }
-
             label {
                 display: block;
                 text-align: left;
@@ -99,7 +95,6 @@ if (!isset($_GET['download'])) {
                 margin-top: 15px;
                 font-size: 14px;
             }
-
             input[type="date"] {
                 width: 90%;
                 padding: 10px;
@@ -112,12 +107,10 @@ if (!isset($_GET['download'])) {
                 transition: all 0.3s ease;
                 outline: none;
             }
-
             input[type="date"]:focus {
                 box-shadow: 0 0 10px #00ff80;
                 border-color: #00ff80;
             }
-
             button {
                 width: 100%;
                 margin-top: 25px;
@@ -131,13 +124,11 @@ if (!isset($_GET['download'])) {
                 font-weight: 600;
                 transition: all 0.3s ease;
             }
-
             button:hover {
                 background: #0a0f0a;
                 color: #00ff80;
                 box-shadow: 0 0 15px #00ff80;
             }
-
             @media (max-width: 480px) {
                 .form-container {
                     padding: 25px 20px;
@@ -158,13 +149,10 @@ if (!isset($_GET['download'])) {
             <h2>Generate Timesheet</h2>
             <form method="get" action="">
                 <input type="hidden" name="id" value="' . htmlspecialchars($employeeId) . '">
-
                 <label>Start Date:</label>
                 <input type="date" name="start" required value="' . date('Y-m-01') . '">
-
                 <label>End Date:</label>
                 <input type="date" name="end" required value="' . date('Y-m-t') . '">
-
                 <input type="hidden" name="download" value="1">
                 <button type="submit">📄 Generate Report</button>
             </form>
@@ -174,7 +162,6 @@ if (!isset($_GET['download'])) {
     exit;
 }
 
-// Determine expected hours (use employee expected times if set, else default to 8)
 $expectedHours = 8.0;
 $expectedClockInDefault = '07:45';
 if (!empty($employee['expected_clockin']) && !empty($employee['expected_clockout'])) {
@@ -183,12 +170,10 @@ if (!empty($employee['expected_clockin']) && !empty($employee['expected_clockout
     if ($t2 > $t1) {
         $expectedHours = ($t2 - $t1) / 3600;
     } else {
-        // overnight shift
         $expectedHours = (($t2 + 24*3600) - $t1) / 3600;
     }
 }
 
-// Fetch attendance rows for the period
 $attStmt = $pdo->prepare("
     SELECT * 
     FROM attendance
@@ -199,7 +184,6 @@ $attStmt = $pdo->prepare("
 $attStmt->execute([$employeeId, $periodStart, $periodEnd]);
 $rows = $attStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch holiday dates into array
 $holidayDates = [];
 try {
     $holidayStmt = $pdo->query("SELECT holiday_date FROM holidays");
@@ -211,23 +195,61 @@ try {
     $holidayDates = [];
 }
 
-// Totals initialization
-$totalHours = 0.0;          // actual worked hours (float)
-$totalOvertime = 0.0;       // overtime hours (float)
-$totalRegularPay = 0.0;     // money
-$totalOvertimePay = 0.0;    // money
-$totalLateFee = 0.0;        // money
+if (!empty($employee['paid_day'])) {
+    $paidDay = (int)$employee['paid_day'];
+    $workedByDate = [];
+    foreach ($rows as $rr) {
+        if (!empty($rr['work_date']) && !empty($rr['clockin_time'])) {
+            $workedByDate[$rr['work_date']] = true;
+        }
+    }
+    try {
+        $cursor = new DateTime($periodStart);
+        $cursor->modify('first day of this month');
+        $endMonth = (new DateTime($periodEnd))->modify('first day of this month');
+        $extra = [];
+        while ($cursor <= $endMonth) {
+            $daysInMonth = (int)$cursor->format('t');
+            $day = min($paidDay, $daysInMonth);
+            $dateStr = $cursor->format('Y-m-') . sprintf('%02d', $day);
+
+            if ($dateStr >= $periodStart && $dateStr <= $periodEnd) {
+                if (empty($workedByDate[$dateStr])) {
+                    $extra[] = [
+                        'work_date' => $dateStr,
+                        'clockin_time' => null,
+                        'clockout_time' => null,
+                        'overtime_hours' => 0,
+                        'comment' => 'Paid day off',
+                        '_paid_day_off' => true
+                    ];
+                }
+            }
+            $cursor->modify('+1 month');
+        }
+        if (!empty($extra)) {
+            $rows = array_merge($rows, $extra);
+            usort($rows, function ($a, $b) {
+                return strcmp($a['work_date'] ?? '', $b['work_date'] ?? '');
+            });
+        }
+    } catch (Throwable $e) {}
+}
+
+$totalHours = 0.0;
+$totalOvertime = 0.0;
+$totalRegularPay = 0.0;
+$totalOvertimePay = 0.0;
+$totalLateFee = 0.0;
 $daysWorked = 0;
 
 $hourlyRate = (float)($employee['hourly_pay'] ?? 0.0);
 $otApplicable = (int)($employee['overtime_applicable'] ?? 0);
-$lateFeeApplicable = isset($employee['late_fee_applicable']) ? (int)$employee['late_fee_applicable'] : 1; // default to apply late fee
+$lateFeeApplicable = isset($employee['late_fee_applicable']) ? (int)$employee['late_fee_applicable'] : 1;
 
-// Prepare PDF
 $pdf = new FPDF('P', 'mm', 'A4');
 $pdf->AddPage();
 
-// Logo
 $logoPath = __DIR__ . '/../assets/img/IROKS.jpg';
 if (file_exists($logoPath)) {
     $pdf->Image($logoPath, 10, 8, 12);
@@ -243,7 +265,6 @@ $pdf->Cell(0, 6, 'Role: ' . ($employee['role'] ?? '-'), 0, 1);
 $pdf->Cell(0, 6, 'Period: ' . date('d M Y', strtotime($periodStart)) . ' - ' . date('d M Y', strtotime($periodEnd)), 0, 1);
 $pdf->Ln(4);
 
-// Table header (adjusted widths so they fit A4)
 $pdf->SetFont('Arial', 'B', 9);
 $pdf->Cell(20, 8, 'Date', 1, 0, 'C');
 $pdf->Cell(18, 8, 'Clock In', 1, 0, 'C');
@@ -253,11 +274,10 @@ $pdf->Cell(16, 8, 'OT (h)', 1, 0, 'C');
 $pdf->Cell(26, 8, 'Reg Pay', 1, 0, 'C');
 $pdf->Cell(26, 8, 'OT Pay', 1, 0, 'C');
 $pdf->Cell(16, 8, 'Late', 1, 0, 'C');
-$pdf->Cell(34, 8, 'Comment', 1, 1, 'C');
+$pdf->Cell(20, 8, 'Holiday/Off', 1, 1, 'C');
 
 $pdf->SetFont('Arial', '', 9);
 
-// Loop rows and compute pay (dynamic overtime calculation + late fee + hourly-only regular pay)
 foreach ($rows as $r) {
     $date = $r['work_date'] ?? '-';
     $in = !empty($r['clockin_time']) ? date('H:i', strtotime($r['clockin_time'])) : '-';
@@ -270,40 +290,53 @@ foreach ($rows as $r) {
     $regularPay = 0.0;
     $overtimePay = 0.0;
 
-    if (!empty($r['clockin_time']) && !empty($r['clockout_time'])) {
+    $isSunday = (date('N', strtotime($date)) == 7);
+    $isHoliday = in_array($date, $holidayDates);
+
+    $holidayOffLabel = '';
+    if (!empty($r['_paid_day_off'])) {
+        $holidayOffLabel = 'Paid Off';
+        $in = '-';
+        $out = '-';
+        $regularPaidHours = $expectedHours;
+        $overtime = 0.0;
+        $lateFee = 0.0;
+        $regularPay = $regularPaidHours * $hourlyRate;
+        $overtimePay = 0.0;
+    } elseif ($isHoliday) {
+        $holidayOffLabel = 'Holiday';
+    } elseif ($isSunday) {
+        $holidayOffLabel = 'Sunday';
+    }
+
+    if (empty($r['_paid_day_off']) && !empty($r['clockin_time']) && !empty($r['clockout_time'])) {
         $inT = strtotime($r['clockin_time']);
         $outT = strtotime($r['clockout_time']);
 
         if ($outT > $inT) {
-            $workedFloat = ($outT - $inT) / 3600.0;
+            $workedFloat = floor(($outT - $inT) / 3600.0);
         } else {
             $workedFloat = 0.0;
         }
 
-        // compute overtime relative to expectedHours
-        if ($workedFloat > $expectedHours) {
-            $overtime = round($workedFloat - $expectedHours, 2);
+        if ($otApplicable) {
+            if ($workedFloat > $expectedHours) {
+                $overtime = round($workedFloat - $expectedHours, 2);
+            } else {
+                $overtime = 0.0;
+            }
+            $regularPaidHours = min($expectedHours, round($workedFloat));
         } else {
             $overtime = 0.0;
+            $regularPaidHours = round($workedFloat);
         }
 
-        // regular paid hours: up to expected (whole hours)
-        $regularPaidHours = min($expectedHours, round($workedFloat));
-
-
-        // Day identification
-        $isSunday = (date('N', strtotime($date)) == 7);
-        $isHoliday = in_array($date, $holidayDates);
-
-        // multipliers
         $regMultiplier = ($isHoliday || $isSunday) ? 2.0 : 1.0;
         $otMultiplier  = ($isHoliday || $isSunday) ? 2.0 : 1.5;
 
-        // pay calculations
         $regularPay = $regularPaidHours * $hourlyRate * $regMultiplier;
         $overtimePay = ($otApplicable && $overtime > 0) ? ($overtime * $hourlyRate * $otMultiplier) : 0.0;
 
-        // Late fee calculation only if applicable to employee
         if ($lateFeeApplicable) {
             $expectedClockIn = !empty($employee['expected_clockin']) ? $employee['expected_clockin'] : $expectedClockInDefault;
             $expectedStartTs = strtotime($date . ' ' . $expectedClockIn);
@@ -321,7 +354,6 @@ foreach ($rows as $r) {
         }
     }
 
-    // accumulate totals
     $totalHours += $workedFloat;
     $totalOvertime += $overtime;
     $totalRegularPay += $regularPay;
@@ -329,41 +361,33 @@ foreach ($rows as $r) {
     $totalLateFee += $lateFee;
     if ($workedFloat > 0) $daysWorked++;
 
-    // comment
     $comment = isset($r['comment']) ? preg_replace("/\s+/", " ", trim($r['comment'])) : '';
     $commentShort = (strlen($comment) > 30) ? substr($comment, 0, 27) . '...' : $comment;
 
-    // mark day note
-    $dayNote = '';
-    if ($isHoliday) $dayNote = ' (Holiday)';
-    elseif ($isSunday) $dayNote = ' (Sunday)';
-
-    // Row output
-    $pdf->Cell(20, 7, $date . $dayNote, 1, 0, 'C');
+    $pdf->Cell(20, 7, $date, 1, 0, 'C');
     $pdf->Cell(18, 7, $in, 1, 0, 'C');
     $pdf->Cell(18, 7, $out, 1, 0, 'C');
-    $pdf->Cell(16, 7, number_format($regularPaidHours, 2), 1, 0, 'C');
-    $pdf->Cell(16, 7, number_format($overtime, 2), 1, 0, 'C');
+    $pdf->Cell(16, 7, formatHoursMinutes($regularPaidHours), 1, 0, 'C');
+    $pdf->Cell(16, 7, formatHoursMinutes($overtime), 1, 0, 'C');
     $pdf->Cell(26, 7, 'SRD ' . number_format($regularPay, 2), 1, 0, 'R');
     $pdf->Cell(26, 7, 'SRD ' . number_format($overtimePay, 2), 1, 0, 'R');
     $pdf->Cell(16, 7, ($lateFee > 0 ? 'SRD ' . number_format($lateFee, 2) : '-'), 1, 0, 'C');
-    $pdf->Cell(34, 7, $commentShort, 1, 1, 'L');
+    $pdf->Cell(20, 7, $holidayOffLabel, 1, 1, 'C');
 }
 
-// Summary
 $pdf->Ln(6);
 $pdf->SetFont('Arial', 'B', 11);
 $pdf->Cell(0, 6, 'Summary', 0, 1);
 
 $pdf->SetFont('Arial', '', 10);
 $pdf->Cell(70, 6, 'Total actual worked hours:', 0, 0);
-$pdf->Cell(0, 6, number_format($totalHours, 2) . ' h', 0, 1);
+$pdf->Cell(0, 6, formatHoursMinutes($totalHours), 0, 1);
 
 $pdf->Cell(70, 6, 'Total paid regular hours:', 0, 0);
 $pdf->Cell(0, 6, 'SRD ' . number_format($totalRegularPay, 2), 0, 1);
 
 $pdf->Cell(70, 6, 'Total overtime hours:', 0, 0);
-$pdf->Cell(0, 6, number_format($totalOvertime, 2) . ' h', 0, 1);
+$pdf->Cell(0, 6, formatHoursMinutes($totalOvertime), 0, 1);
 
 $pdf->Cell(70, 6, 'Total Regular Pay:', 0, 0);
 $pdf->Cell(0, 6, 'SRD ' . number_format($totalRegularPay, 2), 0, 1);
@@ -388,11 +412,10 @@ $pdf->Ln(6);
 $pdf->SetFont('Arial', 'I', 9);
 $pdf->Cell(0, 6, 'Generated: ' . date('Y-m-d H:i:s'), 0, 1);
 
-// Clean any accidental buffered output before sending PDF
 if (ob_get_length()) ob_end_clean();
 
-// Output PDF inline
 $cleanName = preg_replace('/[^A-Za-z0-9_\-]/', '_', ($employee['fullname'] ?? 'employee'));
 $filename = "iRoks_Timesheet_{$cleanName}_{$year}_{$month}.pdf";
 $pdf->Output('I', $filename);
+
 exit;

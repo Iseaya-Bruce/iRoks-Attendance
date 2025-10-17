@@ -31,6 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hourly_pay = $_POST['hourly_pay'] !== '' ? (float)$_POST['hourly_pay'] : 0.00;
     $monthly_pay = $_POST['monthly_pay'] !== '' ? (float)$_POST['monthly_pay'] : 0.00;
 
+    // Paid day of month (1..31 or null)
+    $paid_day = isset($_POST['paid_day']) && $_POST['paid_day'] !== '' ? (int)$_POST['paid_day'] : null;
+    if ($paid_day !== null && ($paid_day < 1 || $paid_day > 31)) {
+        $paid_day = null; // sanitize
+    }
+
     // Checkbox: if present -> 1, otherwise -> 0
     $overtime_applicable = isset($_POST['overtime_applicable']) ? 1 : 0;
     // Update query (add/remove columns as needed to match your schema)
@@ -47,7 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             hourly_pay = ?,
             monthly_pay = ?,
             overtime_applicable = ?,
-            late_fee_applicable = ?
+            late_fee_applicable = ?,
+            paid_day = ?
         WHERE id = ?");
 
     $upd->execute([
@@ -62,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $monthly_pay,
         $overtime_applicable,
         $late_fee_applicable,
+        $paid_day,
         $id
     ]);
 
@@ -96,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 20px #00ff7f;
             border-radius: 15px;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             padding: 30px;
             text-align: center;
             animation: fadeIn 0.8s ease;
@@ -259,6 +267,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label>Monthly Pay (SRD)
             <input type="number" step="0.01" name="monthly_pay" value="<?= htmlspecialchars($emp['monthly_pay'] ?? '0.00') ?>">
+        </label>
+
+        <label>Paid Day Off (Day of Month)
+            <select name="paid_day">
+                <option value="">-- Select day --</option>
+                <?php for ($d=1; $d<=31; $d++): ?>
+                    <option value="<?= $d ?>" <?= (!empty($emp['paid_day']) && (int)$emp['paid_day'] === $d) ? 'selected' : '' ?>><?= $d ?></option>
+                <?php endfor; ?>
+            </select>
         </label>
 
         <label style="display:flex;align-items:center;gap:8px;">

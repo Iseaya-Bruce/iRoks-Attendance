@@ -512,7 +512,7 @@ textarea {
                     <td><?= htmlspecialchars($row['work_date']) ?></td>
                     <td><?= $row['clockin_time'] ? date('H:i', strtotime($row['clockin_time'])) : '-' ?></td>
                     <td><?= $row['clockout_time'] ? date('H:i', strtotime($row['clockout_time'])) : '-' ?></td>
-                    <td><?= round($row['minutes_worked']/60, 2) ?> h</td>
+                    <td><?= floor($row['minutes_worked']/60) ?>h</td>
                     <td><?= htmlspecialchars($row['comment'] ?? '') ?></td>
                 </tr>
             <?php endforeach; ?>

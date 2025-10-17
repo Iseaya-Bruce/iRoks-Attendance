@@ -10,7 +10,7 @@ $user = $_SESSION['user'];
 $employee_id = $_SESSION['employee_id'] ?? $user['id'];
 
 if ($employee_id) {
-    $stmt = $pdo->prepare("SELECT fullname, hourly_pay, overtime_applicable FROM employees WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT fullname, hourly_pay, overtime_applicable, expected_clockin, expected_clockout FROM employees WHERE id = ?");
     $stmt->execute([$employee_id]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -33,22 +33,44 @@ $recStmt = $pdo->prepare("
 $recStmt->execute([$employee_id, $monthStart, $monthEnd]);
 $records = $recStmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Calculate expected hours
+$expectedHours = 8.0;
+if (!empty($employee['expected_clockin']) && !empty($employee['expected_clockout'])) {
+    $t1 = strtotime($employee['expected_clockin']);
+    $t2 = strtotime($employee['expected_clockout']);
+    if ($t2 > $t1) {
+        $expectedHours = ($t2 - $t1) / 3600;
+    } else {
+        $expectedHours = (($t2 + 24*3600) - $t1) / 3600;
+    }
+}
+
 // Calculate totals
-$totalHours = 0; 
+$totalHours = 0;
+$totalRegularPaidHours = 0;
 $totalOvertime = 0;
+$otApplicable = (int)($employee['overtime_applicable'] ?? 0);
 
 foreach ($records as $r) {
     if ($r['clockin_time'] && $r['clockout_time']) {
-        $hours = (strtotime($r['clockout_time']) - strtotime($r['clockin_time'])) / 3600;
+        $hours = floor((strtotime($r['clockout_time']) - strtotime($r['clockin_time'])) / 3600);
         $totalHours += $hours;
-        $totalOvertime += (float)($r['overtime_hours'] ?? 0);
+        if ($otApplicable) {
+            $regularPaid = min($expectedHours, $hours);
+            $overtime = max(0, $hours - $expectedHours);
+        } else {
+            $regularPaid = $hours;
+            $overtime = 0;
+        }
+        $totalRegularPaidHours += $regularPaid;
+        $totalOvertime += $overtime;
     }
 }
 
 // Salary totals for selected month
 $hourly = (float)($employee['hourly_pay'] ?? 0);
 $ot_applicable = (int)($employee['overtime_applicable'] ?? 0);
-$regularPayTotal = $totalHours * $hourly;
+$regularPayTotal = $totalRegularPaidHours * $hourly;
 $overtimePayTotal = $ot_applicable ? $totalOvertime * $hourly * 1.5 : 0;
 $totalPayTotal = $regularPayTotal + $overtimePayTotal;
 ?>
@@ -235,24 +257,34 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
                     <th>Date</th>
                     <th>Clock In</th>
                     <th>Clock Out</th>
-                    <th>Worked Hours</th>
+                    <th>Hours</th>
                     <th>Overtime Hours</th>
                     <th>Regular Pay (SRD)</th>
                     <th>Overtime Pay (SRD)</th>
                     <th>Total Pay (SRD)</th>
                     <th>Comment</th>
                 </tr>
-                <?php foreach ($records as $r): 
-                    $worked = ($r['clockin_time'] && $r['clockout_time'])
-                        ? round((strtotime($r['clockout_time'])-strtotime($r['clockin_time']))/3600,2)
+                <?php foreach ($records as $r):
+                    $workedFloat = ($r['clockin_time'] && $r['clockout_time'])
+                        ? floor((strtotime($r['clockout_time'])-strtotime($r['clockin_time']))/3600)
                         : 0;
 
-                    $overtime = (float)($r['overtime_hours'] ?? 0);
+                    if ($otApplicable) {
+                        if ($workedFloat > $expectedHours) {
+                            $overtime = floor($workedFloat - $expectedHours);
+                        } else {
+                            $overtime = 0;
+                        }
+                        $regularPaidHours = min($expectedHours, floor($workedFloat));
+                    } else {
+                        $overtime = 0;
+                        $regularPaidHours = floor($workedFloat);
+                    }
 
                     $hourly = (float)($employee['hourly_pay'] ?? 0);
                     $ot_applicable = (int)($employee['overtime_applicable'] ?? 0);
 
-                    $regularPay = $worked * $hourly;
+                    $regularPay = $regularPaidHours * $hourly;
                     $overtimePay = $ot_applicable ? $overtime * $hourly * 1.5 : 0;
                     $totalPay = $regularPay + $overtimePay;
                 ?>
@@ -260,7 +292,7 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
                         <td><?=date("Y-m-d", strtotime($r['clockin_time']))?></td>
                         <td><?=date("H:i", strtotime($r['clockin_time']))?></td>
                         <td><?=$r['clockout_time'] ? date("H:i", strtotime($r['clockout_time'])) : "-" ?></td>
-                        <td><?=$worked?></td>
+                        <td><?=$regularPaidHours?></td>
                         <td><?=$overtime?></td>
                         <td><?=number_format($regularPay,2)?></td>
                         <td><?=number_format($overtimePay,2)?></td>
@@ -272,9 +304,9 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
                 <!-- Totals Row -->
                 <tr style="font-weight:bold;background:#222;color:#fff;">
                     <td colspan="5">Totals</td>
-                    <td><?=number_format($totalHours * $employee['hourly_pay'], 2)?></td>
+                    <td><?=number_format($totalRegularPaidHours * $employee['hourly_pay'], 2)?></td>
                     <td><?= $employee['overtime_applicable'] ? number_format($totalOvertime * $employee['hourly_pay'] * 1.5, 2) : '0.00' ?></td>
-                    <td><?=number_format(($totalHours * $employee['hourly_pay']) + ($employee['overtime_applicable'] ? $totalOvertime * $employee['hourly_pay'] * 1.5 : 0), 2)?></td>
+                    <td><?=number_format($totalPayTotal, 2)?></td>
                     <td>-</td>
                 </tr>
             </table>
