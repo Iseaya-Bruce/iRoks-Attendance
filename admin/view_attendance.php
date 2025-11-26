@@ -257,16 +257,36 @@ $totalPayTotal = $regularPayTotal + $overtimePayTotal;
                     $totalPay = $regularPay + $overtimePay;
                 ?>
                     <tr>
-                        <td><?=date("Y-m-d", strtotime($r['clockin_time']))?></td>
-                        <td><?=date("H:i", strtotime($r['clockin_time']))?></td>
-                        <td><?=$r['clockout_time'] ? date("H:i", strtotime($r['clockout_time'])) : "-" ?></td>
+                        <td>
+                            <?php 
+                                $clockin = $r['clockin_time'] ?? ''; 
+                                echo $clockin !== '' ? date("Y-m-d", strtotime($clockin)) : '-'; 
+                            ?>
+                        </td>
+
+                        <td>
+                            <?php 
+                                $clockin = $r['clockin_time'] ?? ''; 
+                                echo $clockin !== '' ? date("H:i", strtotime($clockin)) : '-'; 
+                            ?>
+                        </td>
+
+                        <td>
+                            <?php 
+                                $clockout = $r['clockout_time'] ?? '';
+                                echo $clockout !== '' ? date("H:i", strtotime($clockout)) : '-';
+                            ?>
+                        </td>
+
                         <td><?=$regularPaidHours?></td>
                         <td><?=$overtime?></td>
                         <td><?=number_format($regularPay,2)?></td>
                         <td><?=number_format($overtimePay,2)?></td>
                         <td><?=number_format($totalPay,2)?></td>
-                        <td><?=htmlspecialchars($r['comment'] ?? '')?></td>
+
+                        <td><?= htmlspecialchars($r['comment'] ?? '') ?></td>
                     </tr>
+
                 <?php endforeach; ?>
 
                 <tr style="font-weight:bold;background:#222;color:#fff;">
